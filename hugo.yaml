@@ -1,0 +1,345 @@
+baseURL: https://frommie.github.io/
+languageCode: de-de
+title: Christian Frommert
+
+theme: hugo-profile
+
+outputs:
+  home:
+    - "HTML"
+    - "RSS"
+    - "JSON"
+  page:
+    - "HTML"
+    - "RSS"
+
+Paginate: 3
+enableRobotsTXT: true
+# disqusShortname: your-disqus-shortname
+# googleAnalytics: G-MEASUREMENT_ID
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+
+# Menus:
+  # main:
+    # - identifier: blog
+    #   name: Blog
+    #   title: Blog posts
+    #   url: /blogs
+    #   weight: 1
+    # - identifier: gallery
+    #   name: Gallery
+    #   title: Blog posts
+    #   url: /gallery
+    #  weight: 2
+    #Dropdown menu
+    # - identifier: dropdown
+    #   title: Example dropdown menu
+    #   name: Dropdown
+    #   weight: 3
+    # - identifier: dropdown1
+    #   title: example dropdown 1
+    #   name: example 1
+    #   url: /#
+    #   parent: dropdown
+    #   weight: 1
+    # - identifier: dropdown2
+    #   title: example dropdown 2
+    #   name: example 2
+    #   url: /#
+    #   parent: dropdown
+    #   weight: 2
+
+params:
+  title: "Christian Frommert"
+  description: Portfolio von Christian Frommert
+  # staticPath: ""  # The path to serve the static files from
+  favicon: "/fav.png"
+
+  # Whether to serve bootstrap css and js files from CDN or not. Can be set to true, "css" or "js" to choose between
+  # serving both, only the css, or only the js files through the CDN. Any other value will make so that CDN is not used.
+  # Note the lack of "" in true, it should be of boolean type.
+  useBootstrapCDN: false
+
+  # If you want to load dynamically responsive images from Cloudinary
+  # This requires your images to be uploaded + hosted on Cloudinary
+  # Uncomment and change YOUR_CLOUD_NAME to the Cloud Name in your Cloudinary console
+  # cloudinary_cloud_name: "YOUR_CLOUD_NAME"
+  
+  # Whether to add mathjax support on all pages. Alternatively, you can opt-in per page by adding `mathjax: true` in the frontmatter.
+  mathjax: false
+
+  # Whether the fade animations on the home page will be enabled
+  animate: true
+
+  theme:
+    # disableThemeToggle: true
+    # defaultTheme: "light" # dark
+
+  font:
+    fontSize: 1rem # default: 1rem
+    fontWeight: 400 # default: 400
+    lineHeight: 1.5 # default: 1.5
+    textAlign: left # default: left
+
+  # color preference
+  # color:
+  #   textColor:
+  #   secondaryTextColor:
+  #   backgroundColor:
+  #   secondaryBackgroundColor:
+  #   primaryColor:
+  #   secondaryColor:
+
+  #   darkmode:
+  #     textColor:
+  #     secondaryTextColor:
+  #     backgroundColor:
+  #     secondaryBackgroundColor:
+  #     primaryColor:
+  #     secondaryColor:
+
+  # If you want to customize the menu, you can change it here
+  navbar:
+    align: ms-auto # Left: ms-auto | center: mx-auto | right: me-auto | Default: ms-auto
+    # brandLogo: "/logo.png" # Logo for the brand | default is the favicon variable
+    # showBrandLogo: false # Show brand logo in nav bar | default is true
+    brandName: "Christian Frommert" # Brand name for the brand | default is the title variable
+    disableSearch: true
+    # searchPlaceholder: "Search"
+    stickyNavBar:
+      enable : true
+      showOnScrollUp : true
+    menus:
+      disableAbout: false
+      disableExperience: false
+      disableEducation: false
+      disableProjects: false
+      disableAchievements: false
+      disableContact: false
+
+  # Hero
+  hero:
+    enable: true
+    intro: "Hallo, ich bin"
+    title: "Christian."
+    subtitle: "Ich berate und programmiere."
+    content: "Am liebsten erschaffe ich Webanwendungen. Ich scheue mich nicht davor, neue Programmiersprachen zu erlernen. Außerdem bin ich SAP EAM Berater."
+    image: /images/me.jpg
+    bottomImage:
+      enable: true
+      roundImage: false # Make hero image circular | default false
+    #button:
+    #  enable: true
+    #  name: "Resume"
+    #  url: "lebenslauf_christian_frommert.pdf"
+    #  download: true
+    #  newPage: false
+    socialLinks:
+      fontAwesomeIcons:
+        - icon: fab fa-github
+          url: https://github.com/frommie
+        - icon: fab fa-linkedin-in
+          url: https://linkedin.com/in/christianfrommert/
+        - icon: fab fa-x-twitter
+          url: https://x.com/frommiee
+      #customIcons:
+      #  - icon: /fav.png
+      #    url: "https://example.com"
+
+  # About
+  about:
+    enable: true
+    title: "Über mich"
+    image: "/images/me.jpg"
+    content: |-
+      Ich bin SAP Berater und Softwareentwickler mit einer Passion für Webanwendungen. Nach meiner Ausbildung zum IT-Systemkaufmann studierte ich erfolgreich Informatik. Momentan arbeite ich bei [GISA](https://gisa.de) in Leipzig.
+
+      Aktuell erprobe ich die Neuerungen im SAP EAM und Fiori Umfeld und arbeite nebenbei an einem Planungstool für eine Medienagentur.
+    skills:
+      enable: true
+      title: "Ich kann Erfahrungen in folgenden Technologien vorweisen:"
+      items:
+        - "SAP EAM"
+        - "SAP Screen Personas"
+        - "SAP Fiori"
+        - "PHP"
+        - "JavaScript"
+        - "Python"
+
+  # Experience
+  experience:
+    enable: true
+    title: "Laufbahn"
+    items:
+      - job: "SAP EAM Berater"
+        company: "GISA GmbH"
+        companyUrl: "https://gisa.de"
+        date: "Dezember 2022 - Heute"
+        #featuredLink:
+        #  enable: true
+        #  name: "View the project"
+        #  url: "https://example.com"
+        content: "Aktuell arbeite ich als SAP EAM Berater bei [GISA](https://gisa.de) in Leipzig. Ich helfe Kunden dabei, ihre Instandhaltungsprozesse zu verbessern und arbeite an S/4HANA Migrationsprojekten mit."
+
+      - job: "SAP EAM Anwendungsbetreuer"
+        company: "GISA GmbH"
+        companyUrl: "https://gisa.de"
+        date: "Juni 2018 - November 2022"
+        #featuredLink:
+        #  enable: true
+        #  name: "View the project"
+        #  url: "https://example.com"
+        content: "Fehlerbehebungen im SAP EAM Umfeld"
+
+      - job: "Studentische Hilfskraft"
+        company: "InfAI"
+        companyUrl: "https://infai.org"
+        date: "August 2017 - Mai 2018"
+        #featuredLink:
+        #  enable: true
+        #  name: "View the project"
+        #  url: "https://example.com"
+        content: "Unterstützung im Projekt SB:Digital, Anfertigung Paper"
+
+      - job: "Vertriebsmitarbeiter"
+        company: "DELL"
+        companyUrl: "https://dell.com"
+        date: "Sep 2020 - Dec 2021"
+        #info:
+        #  enable: true
+        #  content: I worked as a software developer for more than one year in Amazon.
+        content: |
+          Kunden beraten, Angebote erstellen, After-Sales Support
+
+          - Angebote
+          - Konzepte
+
+      - job: "Auszubildender"
+        company: "DELL"
+        companyUrl: "https://dell.com"
+        date: "August 2008 - August 2011"
+        #featuredLink:
+        #  enable: true
+        #  name: "View the project"
+        #  url: "https://example.com"
+        content: "Ausbildung in den Bereichen Tech Support & Vertrieb"
+
+  # Education
+  education:
+    enable: true
+    title: "Bildungsweg"
+    index: false
+    items:
+      - title: "Informatik Bachelor of Science"
+        school:
+          name: "Universität Leipzig"
+          url: "https://www.uni-leipzig.de"
+        date: "2014 - 2018"
+        content: |-
+          Thema der Bachelorarbeit: Nutzungsszenarien für Chatbots zur Verbesserung der unternehmensinternen Kommunikation (Note: 1,0)
+        featuredLink:
+          enable: true
+          name: "Bachelorarbeit"
+          url: "ba.pdf"
+      - title: "IT-Systemkaufmann"
+        school:
+          name: "BBS IV Friedrich List Halle"
+          url: "https://www.bbs4-halle.bildung-lsa.de"
+        content: |-
+          Begleitende Ausbildung zum praktischen Teil bei DELL
+
+  # Achievements
+  # achievements:
+    # enable: true
+    # title: "Custom Name"
+    # items:
+    #   - title: Google kickstart runner
+    #     content: I solved all problems with optimal solution.
+    #     url: https://example.com
+    #     image: /images/achievment.jpg
+
+  # Zertifikate
+  #certificates:
+  #  enable: true
+  #  title: "Custom Name"
+  #  content: "test"
+
+  # projects
+  projects:
+    enable: true
+    title: "Projekte"
+    items:
+      - title: Einsatzplanung
+        content: Planungs- und Verwaltungstool für Equipments der Medienagentur BDX.
+        image: /images/projects/BDX.png
+        featured:
+          name: BDX Media
+          link: https://bdxmedia.com/
+        badges:
+          - "Laravel"
+          - "PHP"
+          - "Tailwind"
+        #links:
+        #  - icon: fa fa-envelope
+        #    url: mailto:?subject=Hugo%20Profile%20Template&body=Check%20it%20out:%20https%3a%2f%2fhugo-profile.netlify.app%2fblog%2fmarkdown-syntax%2f
+        #  - icon: fab fa-github
+        #    url: https://github.com/gurusabarish/hugo-profile
+        #  - icon: fab fa-twitter
+        #    url: https://twitter.com/intent/tweet?text=Check+it+out:&url=https%3A%2F%2Fgithub.com%2Fgurusabarish%2Fhugo-profile
+
+  #Contact
+  contact:
+    enable: true
+    title: "Kontakt"
+    content: My inbox is always open. Whether you have a question or just want to say hi, I’ll try my best to get back to you!
+    email: gurusabarisha@gmail.com
+    btnName: Mail me
+    # formspree:
+    #   enable: true # `contact.email` value will be ignored
+    #   formId: abcdefgh # Take it from your form's endpoint, like 'https://formspree.io/f/abcdefgh'
+    #   emailCaption: "Enter your email address"
+    #   messageCaption: "Enter your message here"
+
+  footer:
+    #recentPosts:
+    #  path: "blogs"
+    #  count: 3
+    #  title: Recent Posts
+    #  enable: true
+    #  disableFeaturedImage: false
+    socialNetworks:
+      github: https://github.com/frommie
+      linkedin: https://linkedin.com/in/christianfrommert
+      twitter: https://twitter.com/frommiee
+
+  # List pages like blogs and posts
+  listPages:
+    disableFeaturedImage: false
+
+  # Single pages like blog and post
+  singlePages:
+    readTime:
+      enable: true
+      content: "min read"
+    scrollprogress:
+      enable: true
+
+  # For translations
+  terms:
+    read: "Read"
+    toc: "Table Of Contents"
+    copyright: "All rights reserved"
+    pageNotFound: "Page not found"
+    emailText: "Check out this site"
+
+  datesFormat:
+    article: "Jan 2, 2006"
+    articleList: "Jan 2, 2006"
+    articleRecent: "Jan 2, 2006"
+
+  #customScripts: -| # You can add custom scripts which will be added before </body> tag
+  #  <script type="text/javascript"><!-- any script here --></script>
