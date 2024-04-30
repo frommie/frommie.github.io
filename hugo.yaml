@@ -295,8 +295,8 @@ params:
   contact:
     enable: true
     title: "Kontakt"
-    content: My inbox is always open. Whether you have a question or just want to say hi, I’ll try my best to get back to you!
-    email: gurusabarisha@gmail.com
+    content: Wenn Sie Fragen haben oder einfach Hallo sagen möchten, schreiben Sie mir gern!
+    email: christian.frommert@gmail.com
     btnName: Mail me
     # formspree:
     #   enable: true # `contact.email` value will be ignored
