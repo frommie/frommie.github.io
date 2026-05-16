@@ -1,17 +1,51 @@
 ---
+// src/pages/index.astro
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Stream from "../components/stream/Stream.astro";
+import { getStream } from "../lib/api";
 
+import { Image } from "astro:assets";
+import profileImage from "../assets/profile.jpg";
+
+const items = await getStream();
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Home">
+  <div class="container">
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-layout">
+ 
+        <!-- LEFT: text -->
+        <div class="hero-body">
+          <!--<div class="hero-status">
+            <span class="hero-status-dot"></span>
+            Available for work
+          </div>-->
+          <h1 class="hero-name">SAP-Berater.<br>Entwickler. Macher.</h1>
+          <p class="hero-bio">
+            SAP EAM-Berater bei BEW Berliner Energie &amp; Wärme.<br/>Daneben: Web-Apps,
+            Nebenprojekte und ein Faible für gute UX.
+          </p>
+          <div class="hero-links">
+            <a class="btn btn-primary" href="/about/">Über mich</a>
+            <a href="mailto:christian.frommert@gmail.com" class="btn btn-secondary">Kontakt aufnehmen</a>
+          </div>
+        </div>
+ 
+        <!-- RIGHT: profile photo -->
+        <div class="hero-photo-wrap">
+          <div class="hero-photo">
+            <Image
+              src={profileImage}
+              alt="Christian Frommert"
+              width={528}
+              height={528}
+            />
+          </div>
+        </div>
+      </div>
+    </header>
+    <Stream items={items} />
+  </div>
+</BaseLayout>

@@ -1,0 +1,511 @@
+---
+import {
+  fetchMicros,
+  groupByMonth,
+  computeStats,
+  processBody,
+  fmtShortDate,
+} from '../lib/micro';
+
+const posts  = await fetchMicros();
+const groups = groupByMonth(posts);
+const stats  = computeStats(posts);
+---
+
+<!-- ── Stats bar ──────────────────────────────────────────────── -->
+<div class="micro-stats">
+  <div class="stat-card">
+    <span class="stat-label">Gesamt</span>
+    <span class="stat-value">{stats.total}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Dieses Jahr</span>
+    <span class="stat-value">{stats.thisYear}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Ø/Monat</span>
+    <span class="stat-value">{stats.avgPerMonth}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Aktivster Monat</span>
+    <span class="stat-value stat-value--sm">{stats.mostActive}</span>
+  </div>
+</div>
+
+<!-- ── Controls ──────────────────────────────────────────────── -->
+<div class="micro-controls">
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input
+      id="micro-search"
+      class="search-input"
+      type="search"
+      placeholder="Beiträge suchen…"
+      autocomplete="off"
+      aria-label="Beiträge suchen"
+    />
+    <kbd class="search-kbd" title="Press / to focus">/</kbd>
+  </div>
+
+  {stats.allYears.length > 1 && (
+    <div class="year-tabs" role="group" aria-label="Filter by year">
+      <button class="year-tab active" data-year="all">Alle</button>
+      {stats.allYears.map(y => (
+        <button class="year-tab" data-year={String(y)}>{y}</button>
+      ))}
+    </div>
+  )}
+</div>
+
+
+<!-- ── Live count ─────────────────────────────────────────────── -->
+<p class="result-count" id="result-count" aria-live="polite">
+  {posts.length} {posts.length !== 1 ? 'Beiträge' : 'Beitrag'}
+</p>
+
+<!-- ── Feed ──────────────────────────────────────────────────── -->
+<div id="micro-feed">
+  {groups.map(group => (
+    <section
+      class="month-group"
+      data-group-year={String(group.year)}
+    >
+      <div class="month-header">
+        <h2 class="month-label">{group.label}</h2>
+        <span class="month-line" aria-hidden="true"></span>
+        <span class="month-count">{group.posts.length}</span>
+      </div>
+
+      {group.posts.map(post => {
+        const tags      = post.tags ?? [];
+        const hasLink   = /https?:\/\//.test(post.text ?? '');
+        const charCount = post.text?.length ?? 0;
+        const year      = post.publishedAt ? new Date(post.publishedAt).getFullYear() : '';
+
+        return (
+          <article
+            class="micro-post"
+            data-searchable={[post.text, ...tags].join(' ').toLowerCase()}
+            data-year={String(year)}
+            data-tags={tags.join(',')}
+          >
+            <time class="post-date" datetime={post.publishedAt ?? ''}>
+              {fmtShortDate(post.publishedAt)}
+            </time>
+
+            <div class="post-content">
+              <div class="post-body" set:html={processBody(post.text ?? '')} />
+              {tags.length > 0 && (
+                <div class="post-tags">
+                  {tags.map(tag => (
+                    <button class="post-tag" data-tag={tag}>#{tag}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <span class="post-chars" aria-label={`${charCount} characters`}>
+              {charCount}
+            </span>
+          </article>
+        );
+      })}
+    </section>
+  ))}
+</div>
+
+<!-- ── Empty state ───────────────────────────────────────────── -->
+<div class="micro-empty" id="micro-empty" aria-live="polite">
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+  </svg>
+  <p>Keine Beiträge entsprechen deinen Filtern.</p>
+  <button id="clear-filters">Filter zurücksetzen</button>
+</div>
+
+<!-- ── Styles ─────────────────────────────────────────────────── -->
+<style>
+  /* Stats */
+  .micro-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-8);
+  }
+  .stat-card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: var(--sp-4) var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .stat-label {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--c-text-tertiary);
+  }
+  .stat-value {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--c-text);
+  }
+  .stat-value--sm { font-size: var(--text-base); padding-top: 3px; }
+
+  /* Controls */
+  .micro-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-icon {
+    position: absolute;
+    left: var(--sp-3);
+    color: var(--c-text-tertiary);
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+  .search-input {
+    width: 100%;
+    padding: var(--sp-3) var(--sp-10) var(--sp-3) var(--sp-8);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    background: var(--c-surface);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--c-text);
+    outline: none;
+    transition: border-color var(--t-fast);
+    -webkit-appearance: none;
+  }
+  .search-input:focus { border-color: var(--c-accent); }
+  .search-input::placeholder { color: var(--c-text-tertiary); }
+  .search-kbd {
+    position: absolute;
+    right: var(--sp-3);
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 2px 5px;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    color: var(--c-text-tertiary);
+    background: var(--c-surface-2);
+    pointer-events: none;
+    transition: opacity var(--t-fast);
+  }
+  .search-input:focus ~ .search-kbd { opacity: 0; }
+
+  /* Year tabs */
+  .year-tabs {
+    display: flex;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+  }
+  .year-tab {
+    height: 28px;
+    padding: 0 var(--sp-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--c-border);
+    background: var(--c-surface);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--c-text-secondary);
+    cursor: pointer;
+    transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+  }
+  .year-tab:hover { background: var(--c-surface-2); color: var(--c-text); }
+  .year-tab.active {
+    background: var(--c-text);
+    color: var(--c-bg);
+    border-color: var(--c-text);
+  }
+
+  /* Tag strip */
+  .tag-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-5);
+  }
+  .tag-pill {
+    height: 24px;
+    padding: 0 var(--sp-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--c-border);
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--c-text-secondary);
+    cursor: pointer;
+    transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+  }
+  .tag-pill:hover { border-color: var(--c-border-strong); color: var(--c-text); }
+  .tag-pill.active {
+    background: var(--c-accent-subtle);
+    color: var(--c-accent-text);
+    border-color: var(--c-accent-subtle);
+  }
+
+  /* Result count */
+  .result-count {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--c-text-tertiary);
+    letter-spacing: 0.03em;
+    margin-bottom: var(--sp-4);
+  }
+
+  /* Month group */
+  .month-group { margin-bottom: var(--sp-8); }
+
+  .month-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    position: sticky;
+    top: 56px;       /* below the site nav */
+    background: var(--c-bg);
+    padding: var(--sp-2) 0;
+    z-index: 10;
+    margin-bottom: var(--sp-4);
+  }
+  .month-label {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-text-secondary);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+  }
+  .month-line {
+    flex: 1;
+    height: 1px;
+    background: var(--c-border);
+  }
+  .month-count {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--c-text-tertiary);
+    white-space: nowrap;
+  }
+
+  /* Post row */
+  .micro-post {
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    gap: 0 var(--sp-4);
+    padding: var(--sp-4) 0;
+    border-bottom: 1px solid var(--c-border);
+    align-items: start;
+    transition: background var(--t-fast);
+  }
+  .micro-post:last-child { border-bottom: none; }
+  .micro-post.hidden { display: none; }
+
+  .post-date {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--c-text-tertiary);
+    padding-top: 3px;
+    line-height: 1.5;
+  }
+
+  .post-content { min-width: 0; }
+
+  /* post-body uses :global because content is injected via set:html */
+  .post-body :global(p) {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--c-text);
+    margin-bottom: var(--sp-2);
+  }
+  .post-body :global(p:last-child) { margin-bottom: 0; }
+  .post-body :global(a) {
+    color: var(--c-accent);
+    text-decoration: underline;
+    text-decoration-color: var(--c-accent-subtle);
+    text-underline-offset: 3px;
+    word-break: break-all;
+  }
+
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-top: var(--sp-3);
+  }
+  .post-tag {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--c-text-tertiary);
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: color var(--t-fast);
+  }
+  .post-tag:hover { color: var(--c-accent); }
+
+  .post-chars {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--c-text-tertiary);
+    padding-top: 4px;
+    text-align: right;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  /* Empty state */
+  .micro-empty {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-20) 0;
+    color: var(--c-text-tertiary);
+    text-align: center;
+  }
+  .micro-empty p { font-size: var(--text-sm); color: var(--c-text-secondary); }
+  .micro-empty button {
+    font-size: var(--text-sm);
+    color: var(--c-accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--sp-2) var(--sp-3);
+    border-radius: var(--radius-md);
+    transition: background var(--t-fast);
+  }
+  .micro-empty button:hover { background: var(--c-accent-subtle); }
+
+  /* Responsive */
+  @media (max-width: 560px) {
+    .micro-stats { grid-template-columns: repeat(2, 1fr); }
+    .micro-post  { grid-template-columns: 48px 1fr auto; gap: 0 var(--sp-3); }
+  }
+</style>
+
+<!-- ── Client script ──────────────────────────────────────────── -->
+<script>
+  // ── State ───────────────────────────────────────────────────────
+  const state = { search: '', year: 'all', tag: '' };
+
+  // ── DOM refs ────────────────────────────────────────────────────
+  const searchInput  = document.getElementById('micro-search')  as HTMLInputElement;
+  const resultCount  = document.getElementById('result-count')!;
+  const emptyState   = document.getElementById('micro-empty')!;
+  const feed         = document.getElementById('micro-feed')!;
+  const clearBtn     = document.getElementById('clear-filters')!;
+
+  // ── Core filter logic ────────────────────────────────────────────
+  function applyFilters() {
+    const q = state.search.toLowerCase().trim();
+    let visible = 0;
+
+    feed.querySelectorAll<HTMLElement>('.micro-post').forEach(post => {
+      const matchSearch = !q || (post.dataset.searchable ?? '').includes(q);
+      const matchYear   = state.year === 'all' || post.dataset.year === state.year;
+      const matchTag    = !state.tag  || (post.dataset.tags ?? '').split(',').includes(state.tag);
+
+      const show = matchSearch && matchYear && matchTag;
+      post.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+
+    // Hide month groups that have no visible posts
+    feed.querySelectorAll<HTMLElement>('.month-group').forEach(group => {
+      const hasVisible = !!group.querySelector('.micro-post:not(.hidden)');
+      group.style.display = hasVisible ? '' : 'none';
+    });
+
+    const isFiltered = q || state.year !== 'all' || !!state.tag;
+    resultCount.textContent = `${visible} ${visible !== 1 ? 'Beiträge' : 'Beitrag'}${isFiltered ? ' gefunden' : ''}`;
+    emptyState.style.display = visible === 0 ? 'flex' : 'none';
+  }
+
+  function resetFilters() {
+    state.search = '';
+    state.year   = 'all';
+    state.tag    = '';
+    searchInput.value = '';
+
+    document.querySelectorAll('.year-tab')
+      .forEach(t => t.classList.toggle('active', t.getAttribute('data-year') === 'all'));
+    document.querySelectorAll('.tag-pill')
+      .forEach(p => p.classList.remove('active'));
+
+    applyFilters();
+  }
+
+  // ── Search ───────────────────────────────────────────────────────
+  searchInput.addEventListener('input', () => {
+    state.search = searchInput.value;
+    applyFilters();
+  });
+
+  // Press "/" anywhere (outside inputs) to focus the search field
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    if (e.key === 'Escape' && document.activeElement === searchInput) {
+      searchInput.blur();
+    }
+  });
+
+  // ── Year filter ──────────────────────────────────────────────────
+  document.querySelector('.year-tabs')?.addEventListener('click', e => {
+    const tab = (e.target as Element).closest<HTMLElement>('.year-tab');
+    if (!tab) return;
+
+    state.year = tab.dataset.year!;
+    document.querySelectorAll('.year-tab')
+      .forEach(t => t.classList.toggle('active', t === tab));
+    applyFilters();
+  });
+
+  // ── Tag filter (strip + inline post tags) ────────────────────────
+  function setTag(tag: string) {
+    // Toggle: clicking the active tag deactivates it
+    state.tag = state.tag === tag ? '' : tag;
+
+    document.querySelectorAll('.tag-pill')
+      .forEach(p => p.classList.toggle(
+        'active',
+        (p as HTMLElement).dataset.tag === state.tag,
+      ));
+
+    applyFilters();
+  }
+
+  document.querySelector('.tag-strip')?.addEventListener('click', e => {
+    const pill = (e.target as Element).closest<HTMLElement>('.tag-pill');
+    if (pill) setTag(pill.dataset.tag!);
+  });
+
+  feed.addEventListener('click', e => {
+    const tag = (e.target as Element).closest<HTMLElement>('.post-tag');
+    if (tag) setTag(tag.dataset.tag!);
+  });
+
+  // ── Clear button ─────────────────────────────────────────────────
+  clearBtn.addEventListener('click', resetFilters);
+</script>

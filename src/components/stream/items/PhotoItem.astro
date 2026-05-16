@@ -1,0 +1,36 @@
+---
+// src/components/stream/items/PhotoItem.astro
+import StreamItem from "../StreamItem.astro";
+import {urlFor} from '../../../lib/image'
+
+const { item } = Astro.props;
+---
+<StreamItem type="photo" date={item.publishedAt}>
+  <figure>
+    <img src={urlFor(item.image)
+    .width(1400)
+    .auto("format")
+    .quality(80)
+    .url()} alt={item.caption ?? ''} />
+    {item.caption && <figcaption>{item.caption}</figcaption>}
+  </figure>
+</StreamItem>
+
+<style>
+  figure img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--radius-lg);
+  }
+
+  figcaption {
+    margin-top: var(--sp-3);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-sm);
+    color: var(--c-text-tertiary);
+    line-height: var(--leading-relaxed);
+    padding-left: var(--sp-1);
+  }
+</style>

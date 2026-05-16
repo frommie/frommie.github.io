@@ -1,0 +1,161 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Über mich" description="SAP PM-Berater bei BEW Berliner Energie & Wärme – Brücke zwischen Enterprise-Systemen und Webentwicklung mit Fokus auf gute UX.">
+  <div class="container">
+    <div class="about-page">
+      <div class="about-intro">
+        <h1 class="about-heading">Über mich</h1>
+        <div class="about-bio">
+          <p>
+            Meine Arbeit bewegt sich in zwei Welten, die mehr gemeinsam haben, als man zunächst
+            denken würde.
+          </p>
+          <p>
+            Bei BEW Berliner Energie &amp; Wärme bin ich der interne SAP-Consultant für
+            Instandhaltung. In der Praxis heißt das: SAP zuverlässig halten für Menschen, die es
+            zur Steuerung physischer Infrastruktur brauchen – Incidents lösen, Fehler von IDoc-,
+            RFC-, OData- und SOAP-Schnittstellen debuggen, Konzepte für neue Anforderungen
+            erstellen und an Strategiegesprächen über S/4HANA-Migrationen und SAP BTP teilnehmen.
+            Je näher ich SAP Fiori gekommen bin, desto mehr wurde mein Web-Development-Hintergrund
+            zu einem echten Vorteil in der Enterprise-Welt – und umgekehrt.
+          </p>
+          <p>
+            Abseits von SAP baue ich Dinge. Meist beginnt es mit einem konkreten Problem – jemand
+            muss beispielsweise nachverfolgen, welches Equipment für überlappende Veranstaltungen
+            gebucht ist – und endet mit einem funktionierenden Produkt. Manches wird live
+            geschaltet. Manches bleibt Proof-of-Concept. Das Kriterium ist in beiden Fällen
+            dasselbe: Ist es wirklich nützlich? Enterprise-Software hat den Ruf, umständlich zu
+            sein. Ich halte das für lösbar.
+          </p>
+          <p class="about-bio-aside">
+            Ich fotografiere auch gerne – die Ergebnisse sind auf dieser Seite zu sehen.
+          </p>
+        </div>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-section">
+          <h3>Erfahrung</h3>
+          <div>
+            <div class="work-item">
+              <div class="work-item-left">
+                <p class="work-role">Senior SAP EAM Consultant</p>
+                <p class="work-company">BEW Berliner Energie &amp; Wärme GmbH</p>
+              </div>
+              <span class="work-period">2025 – heute</span>
+            </div>
+            <div class="work-item">
+              <div class="work-item-left">
+                <p class="work-role">SAP EAM Consultant</p>
+                <p class="work-company">GISA GmbH</p>
+              </div>
+              <span class="work-period">2018 – 2025</span>
+            </div>
+            <div class="work-item">
+              <div class="work-item-left">
+                <p class="work-role">Informatik B.Sc.</p>
+                <p class="work-company">Universität Leipzig</p>
+              </div>
+              <span class="work-period">2014 – 2018</span>
+            </div>
+            <div class="work-item">
+              <div class="work-item-left">
+                <p class="work-role">Inside Sales Representative</p>
+                <p class="work-company">DELL Halle GmbH</p>
+              </div>
+              <span class="work-period">2011 – 2014</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-section">
+          <h3>Skills</h3>
+          <p class="skills-group-label">Enterprise &amp; SAP</p>
+          <div class="stack-list">
+            <span class="tag">SAP PM / EAM</span>
+            <span class="tag">SAP ERP</span>
+            <span class="tag">SAP S/4HANA</span>
+            <span class="tag">SAP BTP</span>
+            <span class="tag">SAP Fiori</span>
+            <span class="tag">SAP Screen Personas</span>
+            <span class="tag">IDoc / RFC / OData</span>
+          </div>
+          <p class="skills-group-label">Web &amp; Dev</p>
+          <div class="stack-list">
+            <span class="tag">TypeScript</span>
+            <span class="tag">JavaScript</span>
+            <span class="tag">Astro</span>
+            <span class="tag">React</span>
+            <span class="tag">Node.js</span>
+            <span class="tag">CSS</span>
+            <span class="tag">SQL</span>
+          </div>
+        </div>
+
+        <div class="about-section">
+          <h3>Kontakt</h3>
+          <div class="contact-links">
+            <a href="mailto:christian.frommert@gmail.com" class="btn btn-secondary">E-Mail schreiben ↗</a>
+            <a href="https://github.com/frommie/" target="_blank" class="btn btn-ghost">@frommie @ GitHub ↗</a>
+            <a href="https://linkedin.com/in/christianfrommert" target="_blank" class="btn btn-ghost">christianfrommert @ LinkedIn ↗</a>
+            <a href="https://twitter.com/frommiee/" target="_blank" class="btn btn-ghost">@frommiee @ Twitter ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-intro {
+    margin-bottom: var(--sp-16);
+  }
+
+  .about-heading {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--sp-5);
+  }
+
+  .about-bio {
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+
+  .about-bio p {
+    font-size: var(--text-md);
+    color: var(--c-text-secondary);
+    line-height: var(--leading-relaxed);
+  }
+
+  .about-bio-aside {
+    color: var(--c-text-tertiary) !important;
+    font-style: italic;
+  }
+
+  .skills-group-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--c-text-tertiary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: var(--sp-2);
+    margin-top: var(--sp-4);
+  }
+
+  .skills-group-label:first-of-type {
+    margin-top: 0;
+  }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    align-items: flex-start;
+  }
+</style>

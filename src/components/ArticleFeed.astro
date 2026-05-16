@@ -1,0 +1,830 @@
+---
+import {
+  fetchArticles,
+  fetchFeaturedArticle,
+  computeStats,
+  groupByYear,
+  timeBucket,
+  fmtTotalTime,
+  fmtDate,
+  fmtShortDate,
+} from '../lib/articles';
+
+const articles = await fetchArticles();
+const stats    = computeStats(articles);
+
+// Featured: from siteSettings first, otherwise fall back to latest
+const featuredFromSettings = await fetchFeaturedArticle();
+const featured   = featuredFromSettings ?? articles[0] ?? null;
+const isFeatured = !!featuredFromSettings;
+const rest       = articles.filter(a => a._id !== featured?._id);
+const yearGroups = groupByYear(articles);
+
+const BUCKET_LABEL: Record<string, string> = {
+  quick:  '≤ 5 min',
+  medium: '5–15 min',
+  long:   '15+ min',
+};
+---
+
+<!-- ── Stats ──────────────────────────────────────────────────── -->
+<div class="article-stats">
+  <div class="stat-card">
+    <span class="stat-label">Artikel</span>
+    <span class="stat-value">{stats.total}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Lesezeit</span>
+    <span class="stat-value">{fmtTotalTime(stats.totalMinutes)}</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Ø Länge</span>
+    <span class="stat-value">{stats.avgMinutes} min</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Beliebtestes</span>
+    <span class="stat-value stat-value--sm">{stats.topTag}</span>
+  </div>
+</div>
+
+<!-- ── Featured article ───────────────────────────────────────── -->
+{featured && (
+  <a class="featured-card" href={`/articles/${featured.slug}`}>
+    <div class="featured-eyebrow">
+      <span class="featured-badge">
+        {isFeatured ? 'Empfohlen' : 'Neuester'}
+      </span>
+      <span class="featured-rt">{featured.readingTime} Min. Lesezeit</span>
+    </div>
+    <h2 class="featured-title">{featured.title}</h2>
+    {featured.excerpt && (
+      <p class="featured-excerpt">{featured.excerpt}</p>
+    )}
+    <div class="featured-footer">
+      <div class="featured-meta">
+        <span>{fmtDate(featured.publishedAt)}</span>
+        {(featured.tags ?? []).map(t => (
+          <span class="featured-tag">#{t}</span>
+        ))}
+      </div>
+      <span class="featured-cta">Artikel lesen →</span>
+    </div>
+  </a>
+)}
+
+<!-- ── Controls ──────────────────────────────────────────────── -->
+<div class="article-controls">
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input
+      id="article-search"
+      class="search-input"
+      type="search"
+      placeholder="Artikel suchen…"
+      autocomplete="off"
+      aria-label="Artikel suchen"
+    />
+    <kbd class="search-kbd" title="Press / to focus">/</kbd>
+  </div>
+
+  <div class="filter-row">
+    <!-- Reading time filter -->
+    <div class="rt-tabs" role="group" aria-label="Filter by reading time">
+      <button class="rt-tab active" data-bucket="all">Alle</button>
+      {(['quick', 'medium', 'long'] as const).map(b => (
+        <button class="rt-tab" data-bucket={b}>{BUCKET_LABEL[b]}</button>
+      ))}
+    </div>
+
+    <!-- List / Grid toggle -->
+    <div class="view-toggle" role="group" aria-label="View style">
+      <button class="view-btn active" data-view="list" aria-label="List view">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+        </svg>
+      </button>
+      <button class="view-btn" data-view="grid" aria-label="Grid view">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tag strip ─────────────────────────────────────────────── -->
+{stats.allTags.length > 0 && (
+  <div class="tag-strip" role="group" aria-label="Filter by tag">
+    {stats.allTags.map(tag => (
+      <button class="tag-pill" data-tag={tag}>#{tag}</button>
+    ))}
+  </div>
+)}
+
+<!-- ── Result count ───────────────────────────────────────────── -->
+<p class="result-count" id="result-count" aria-live="polite">
+  {articles.length} Artikel
+</p>
+
+<!-- ── Feed ──────────────────────────────────────────────────── -->
+<div id="article-feed" class="article-feed article-feed--list">
+  {yearGroups.map(([year, articles]) => (
+    <section class="year-group" data-group-year={String(year)}>
+      <div class="year-header">
+        <h2 class="year-label">{year}</h2>
+        <span class="year-line" aria-hidden="true"></span>
+        <span class="year-count">{articles.length}</span>
+      </div>
+
+      {articles.map(article => {
+        const tags   = article.tags ?? [];
+        const bucket = timeBucket(article.readingTime);
+        const searchable = [
+          article.title,
+          article.excerpt,
+          ...tags,
+        ].filter(Boolean).join(' ').toLowerCase();
+
+        return (
+          <article
+            class="article-item"
+            data-searchable={searchable}
+            data-bucket={bucket}
+            data-tags={tags.join(',')}
+            data-year={String(year)}
+          >
+            <!-- List layout -->
+            <div class="item-list">
+              <div class="item-top">
+                <a class="article-title" href={`/articles/${article.slug}`}>
+                  {article.title}
+                </a>
+                <span class={`rt-badge rt-${bucket}`}>
+                  {article.readingTime} min
+                </span>
+              </div>
+              <div class="item-meta">
+                <time class="article-date" datetime={article.publishedAt ?? ''}>
+                  {fmtShortDate(article.publishedAt)}
+                </time>
+                {tags.length > 0 && (
+                  <div class="article-tags" aria-label="Tags">
+                    {tags.map(t => (
+                      <a class="article-tag" href={`/articles/tags/${t}`}>#{t}</a>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {article.excerpt && (
+                <p class="article-excerpt">{article.excerpt}</p>
+              )}
+              <a class="item-readmore" href={`/articles/${article.slug}`}>
+                Artikel lesen →
+              </a>
+            </div>
+
+            <!-- Grid layout (same data, different markup role) -->
+            <a class="item-grid" href={`/articles/${article.slug}`} tabindex="-1" aria-hidden="true">
+              <div class="grid-top">
+                <span class={`rt-badge rt-${bucket}`}>{article.readingTime} min</span>
+              </div>
+              <h3 class="grid-title">{article.title}</h3>
+              {article.excerpt && (
+                <p class="grid-excerpt">{article.excerpt}</p>
+              )}
+              <div class="grid-footer">
+                <div>
+                  <time class="article-date" datetime={article.publishedAt ?? ''}>
+                    {fmtShortDate(article.publishedAt)}
+                  </time>
+                  {tags.length > 0 && (
+                    <div class="article-tags">
+                      {tags.map(t => <a class="article-tag" href={`/articles/tags/${t}`}>#{t}</a>)}
+                    </div>
+                  )}
+                </div>
+                <span class="grid-arrow">→</span>
+              </div>
+            </a>
+          </article>
+        );
+      })}
+    </section>
+  ))}
+</div>
+
+<!-- ── Empty state ────────────────────────────────────────────── -->
+<div class="articles-empty" id="articles-empty">
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="9" y1="13" x2="15" y2="13"/>
+  </svg>
+  <p>Keine Artikel entsprechen deinen Filtern.</p>
+  <button id="clear-filters">Filter zurücksetzen</button>
+</div>
+
+<style>
+  /* ── Stats ──────────────────────────────────────────────────── */
+  .article-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-8);
+  }
+  .stat-card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: var(--sp-4) var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .stat-label {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--c-text-tertiary);
+  }
+  .stat-value {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--c-text);
+  }
+  .stat-value--sm { font-size: var(--text-base); padding-top: 3px; }
+
+  /* ── Featured card ──────────────────────────────────────────── */
+  .featured-card {
+    display: block;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-6) var(--sp-8);
+    margin-bottom: var(--sp-8);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color var(--t-fast), background var(--t-fast);
+  }
+  .featured-card:hover {
+    border-color: var(--c-border-strong);
+    background: var(--c-surface);
+  }
+  .featured-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .featured-badge {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-text-secondary);
+    background: var(--c-surface-2);
+    border: 1px solid var(--c-border);
+    padding: 2px var(--sp-2);
+    border-radius: var(--radius-sm);
+  }
+  .featured-rt {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--c-text-tertiary);
+  }
+  .featured-title {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: var(--leading-snug);
+    margin-bottom: var(--sp-4);
+    color: var(--c-text);
+  }
+  .featured-excerpt {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--c-text-secondary);
+    margin-bottom: var(--sp-5);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .featured-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+  .featured-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--c-text-secondary);
+    flex-wrap: wrap;
+  }
+  .featured-tag { color: var(--c-text-tertiary); }
+  .featured-cta {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--c-accent);
+    white-space: nowrap;
+    transition: color var(--t-fast);
+  }
+  .featured-card:hover .featured-cta { color: var(--c-accent-hover); }
+
+  /* ── Controls ───────────────────────────────────────────────── */
+  .article-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+  .search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-icon {
+    position: absolute;
+    left: var(--sp-3);
+    color: var(--c-text-tertiary);
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    padding: var(--sp-3) var(--sp-10) var(--sp-3) var(--sp-8);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    background: var(--c-surface);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--c-text);
+    outline: none;
+    transition: border-color var(--t-fast);
+    -webkit-appearance: none;
+  }
+  .search-input:focus { border-color: var(--c-accent); }
+  .search-input::placeholder { color: var(--c-text-tertiary); }
+  .search-kbd {
+    position: absolute;
+    right: var(--sp-3);
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 2px 5px;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    color: var(--c-text-tertiary);
+    background: var(--c-surface-2);
+    pointer-events: none;
+    transition: opacity var(--t-fast);
+  }
+  .search-input:focus ~ .search-kbd { opacity: 0; }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+
+  /* Reading time tabs */
+  .rt-tabs { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+  .rt-tab {
+    height: 28px;
+    padding: 0 var(--sp-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--c-border);
+    background: var(--c-surface);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--c-text-secondary);
+    cursor: pointer;
+    transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+    white-space: nowrap;
+  }
+  .rt-tab:hover { background: var(--c-surface-2); color: var(--c-text); }
+  .rt-tab.active {
+    background: var(--c-text);
+    color: var(--c-bg);
+    border-color: var(--c-text);
+  }
+
+  /* View toggle */
+  .view-toggle {
+    display: flex;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .view-btn {
+    width: 32px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: var(--c-surface);
+    color: var(--c-text-secondary);
+    cursor: pointer;
+    transition: background var(--t-fast), color var(--t-fast);
+  }
+  .view-btn:hover { color: var(--c-text); }
+  .view-btn.active {
+    background: var(--c-surface-2);
+    color: var(--c-text);
+  }
+
+  /* Tag strip */
+  .tag-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-4);
+  }
+  .tag-pill {
+    height: 24px;
+    padding: 0 var(--sp-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--c-border);
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--c-text-secondary);
+    cursor: pointer;
+    transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+  }
+  .tag-pill:hover { border-color: var(--c-border-strong); color: var(--c-text); }
+  .tag-pill.active {
+    background: var(--c-accent-subtle);
+    color: var(--c-accent-text);
+    border-color: var(--c-accent-subtle);
+  }
+
+  /* Result count */
+  .result-count {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--c-text-tertiary);
+    letter-spacing: 0.03em;
+    margin-bottom: var(--sp-4);
+  }
+
+  /* ── Year group ─────────────────────────────────────────────── */
+  .year-group { margin-bottom: var(--sp-10); }
+  .year-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    position: sticky;
+    top: 56px;
+    background: var(--c-bg);
+    padding: var(--sp-2) 0;
+    z-index: 10;
+    margin-bottom: var(--sp-3);
+  }
+  .year-label {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-text-secondary);
+    font-family: var(--font-mono);
+  }
+  .year-line { flex: 1; height: 1px; background: var(--c-border); }
+  .year-count {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--c-text-tertiary);
+  }
+
+  /* ── Article item (shared) ──────────────────────────────────── */
+  .article-item.hidden { display: none; }
+
+  .rt-badge {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    padding: 2px var(--sp-2);
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .rt-quick  { background: #eaf3de; color: #3b6d11; }
+  .rt-medium { background: var(--c-accent-subtle); color: var(--c-accent-text); }
+  .rt-long   { background: #eeedfe; color: #3c3489; }
+
+  [data-theme="dark"] .rt-quick  { background: #172b0b; color: #86c04e; }
+  [data-theme="dark"] .rt-long   { background: #1e1a3d; color: #a89ff4; }
+
+  .article-date {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--c-text-tertiary);
+  }
+  .article-tags { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+  .article-tag {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--c-text-tertiary);
+    text-decoration: none;
+    transition: color var(--t-fast);
+  }
+  .article-tag:hover { color: var(--c-accent); }
+
+  /* ── LIST view ──────────────────────────────────────────────── */
+  .article-feed--list .item-grid { display: none; }
+
+  .item-list {
+    padding: var(--sp-5) 0;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .year-group .article-item:last-child .item-list { border-bottom: none; }
+
+  .item-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-2);
+  }
+  .article-title {
+    font-size: var(--text-base);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: var(--leading-snug);
+    color: var(--c-text);
+    text-decoration: none;
+    transition: color var(--t-fast);
+    flex: 1;
+  }
+  .article-title:hover { color: var(--c-accent); }
+
+  .item-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-3);
+  }
+  .article-excerpt {
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--c-text-secondary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: var(--sp-3);
+  }
+  .item-readmore {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--c-accent);
+    text-decoration: none;
+    transition: gap var(--t-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+  }
+  .item-readmore:hover { gap: var(--sp-2); }
+
+  /* ── GRID view ──────────────────────────────────────────────── */
+  .article-feed--grid .item-list { display: none; }
+  .article-feed--grid .year-group { margin-bottom: var(--sp-8); }
+  .article-feed--grid .year-header { margin-bottom: var(--sp-5); }
+
+  .article-feed--grid .year-group > .article-item {
+    display: contents; /* let children flow into the grid */
+  }
+  .article-feed--grid .year-group {
+    display: block; /* reset for the header */
+  }
+  .article-feed--grid .year-group .article-item:not(.hidden) ~ .article-item:not(.hidden) {
+    /* spacing handled inside item-grid */
+  }
+
+  /* Grid uses a 2-col layout on the section */
+  .article-feed--grid .year-group > :not(.year-header) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-4);
+  }
+  /* Flatten: each article-item in grid mode just shows item-grid */
+  .article-feed--grid .year-group > .article-item {
+    display: block;
+  }
+
+  .item-grid {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-5) var(--sp-6);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color var(--t-fast), background var(--t-fast);
+    height: 100%;
+  }
+  .item-grid:hover {
+    border-color: var(--c-border-strong);
+    background: var(--c-surface);
+  }
+  .grid-top { margin-bottom: var(--sp-4); }
+  .grid-title {
+    font-size: var(--text-base);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: var(--leading-snug);
+    color: var(--c-text);
+    margin-bottom: var(--sp-3);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .grid-excerpt {
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--c-text-secondary);
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: var(--sp-5);
+  }
+  .grid-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    margin-top: auto;
+  }
+  .grid-arrow {
+    font-size: var(--text-base);
+    color: var(--c-accent);
+    flex-shrink: 0;
+  }
+
+  /* ── Empty state ────────────────────────────────────────────── */
+  .articles-empty {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-20) 0;
+    color: var(--c-text-tertiary);
+    text-align: center;
+  }
+  .articles-empty p { font-size: var(--text-sm); color: var(--c-text-secondary); }
+  .articles-empty button {
+    font-size: var(--text-sm);
+    color: var(--c-accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--sp-2) var(--sp-3);
+    border-radius: var(--radius-md);
+    transition: background var(--t-fast);
+  }
+  .articles-empty button:hover { background: var(--c-accent-subtle); }
+
+  /* ── Responsive ─────────────────────────────────────────────── */
+  @media (max-width: 560px) {
+    .article-stats { grid-template-columns: repeat(2, 1fr); }
+    .filter-row    { flex-direction: column; align-items: flex-start; }
+    .featured-card { padding: var(--sp-5) var(--sp-5); }
+    .article-feed--grid .year-group > :not(.year-header) {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // ── State ────────────────────────────────────────────────────────
+  const state = { search: '', bucket: 'all', tag: '', view: 'list' as 'list' | 'grid' };
+
+  // ── DOM refs ─────────────────────────────────────────────────────
+  const searchInput = document.getElementById('article-search') as HTMLInputElement;
+  const resultCount = document.getElementById('result-count')!;
+  const emptyState  = document.getElementById('articles-empty')!;
+  const feed        = document.getElementById('article-feed')!;
+  const clearBtn    = document.getElementById('clear-filters')!;
+
+  // ── Filter ───────────────────────────────────────────────────────
+  function applyFilters() {
+    const q = state.search.toLowerCase().trim();
+    let visible = 0;
+
+    feed.querySelectorAll<HTMLElement>('.article-item').forEach(item => {
+      const matchSearch = !q || (item.dataset.searchable ?? '').includes(q);
+      const matchBucket = state.bucket === 'all' || item.dataset.bucket === state.bucket;
+      const matchTag    = !state.tag  || (item.dataset.tags ?? '').split(',').includes(state.tag);
+
+      const show = matchSearch && matchBucket && matchTag;
+      item.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+
+    // Hide year groups that have no visible articles
+    feed.querySelectorAll<HTMLElement>('.year-group').forEach(group => {
+      const hasVisible = !!group.querySelector('.article-item:not(.hidden)');
+      group.style.display = hasVisible ? '' : 'none';
+    });
+
+    const isFiltered = q || state.bucket !== 'all' || !!state.tag;
+    resultCount.textContent =
+      `${visible} Artikel${isFiltered ? ' gefunden' : ''}`;
+    emptyState.style.display = visible === 0 ? 'flex' : 'none';
+  }
+
+  function resetFilters() {
+    state.search = '';
+    state.bucket = 'all';
+    state.tag    = '';
+    searchInput.value = '';
+    document.querySelectorAll('.rt-tab')
+      .forEach(t => t.classList.toggle('active', t.getAttribute('data-bucket') === 'all'));
+    document.querySelectorAll('.tag-pill')
+      .forEach(p => p.classList.remove('active'));
+    applyFilters();
+  }
+
+  // ── Search ───────────────────────────────────────────────────────
+  searchInput.addEventListener('input', () => {
+    state.search = searchInput.value;
+    applyFilters();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement?.tagName !== 'INPUT') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    if (e.key === 'Escape' && document.activeElement === searchInput) {
+      searchInput.blur();
+    }
+  });
+
+  // ── Reading time filter ──────────────────────────────────────────
+  document.querySelector('.rt-tabs')?.addEventListener('click', e => {
+    const tab = (e.target as Element).closest<HTMLElement>('.rt-tab');
+    if (!tab) return;
+    state.bucket = tab.dataset.bucket!;
+    document.querySelectorAll('.rt-tab')
+      .forEach(t => t.classList.toggle('active', t === tab));
+    applyFilters();
+  });
+
+  // ── Tag filter ───────────────────────────────────────────────────
+  function setTag(tag: string) {
+    state.tag = state.tag === tag ? '' : tag;
+    document.querySelectorAll('.tag-pill')
+      .forEach(p => p.classList.toggle(
+        'active', (p as HTMLElement).dataset.tag === state.tag,
+      ));
+    applyFilters();
+  }
+
+  document.querySelector('.tag-strip')?.addEventListener('click', e => {
+    const pill = (e.target as Element).closest<HTMLElement>('.tag-pill');
+    if (pill) setTag(pill.dataset.tag!);
+  });
+
+  // ── View toggle ──────────────────────────────────────────────────
+  document.querySelector('.view-toggle')?.addEventListener('click', e => {
+    const btn = (e.target as Element).closest<HTMLElement>('.view-btn');
+    if (!btn) return;
+
+    state.view = btn.dataset.view as 'list' | 'grid';
+    document.querySelectorAll('.view-btn')
+      .forEach(b => b.classList.toggle('active', b === btn));
+
+    // Swap grid items from tabindex:-1/aria-hidden (list) vs interactive (grid)
+    const isGrid = state.view === 'grid';
+    feed.querySelectorAll<HTMLElement>('.item-grid').forEach(el => {
+      el.tabIndex     = isGrid ? 0 : -1;
+      el.ariaHidden   = isGrid ? 'false' : 'true';
+    });
+    feed.querySelectorAll<HTMLElement>('.article-title, .item-readmore').forEach(el => {
+      el.tabIndex = isGrid ? -1 : 0;
+    });
+
+    feed.className = `article-feed article-feed--${state.view}`;
+  });
+
+  // ── Clear ────────────────────────────────────────────────────────
+  clearBtn.addEventListener('click', resetFilters);
+</script>

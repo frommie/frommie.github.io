@@ -1,0 +1,125 @@
+---
+// src/components/stream/Stream.astro
+import MicroItem from "./items/MicroItem.astro";
+import PhotoItem from "./items/PhotoItem.astro";
+import ArticleItem from "./items/ArticleItem.astro";
+
+import type { StreamItemType } from "../../types/content";
+
+const { items } = Astro.props as {
+  items: StreamItemType[];
+};
+
+const PER_PAGE = 15;
+---
+
+<div class="stream-header">
+    <span class="stream-label">Stream</span>
+    <div style="display:flex;gap:var(--sp-2);align-items:center;">
+        <button class="tag active" data-filter="all">alle</button>
+        <button class="tag" data-filter="article">Artikel</button>
+        <button class="tag" data-filter="micro">Micro</button>
+        <button class="tag" data-filter="photo">Fotos</button>
+    </div>
+</div>
+
+<div class="stream" id="stream">
+    {items.map((item) => {
+        switch (item._type) {
+            case "micro":
+                return <MicroItem item={item} />;
+            case "photo":
+                return <PhotoItem item={item} />;
+            case "article":
+                return <ArticleItem item={item} />;
+            default:
+                return null;
+        }
+    })}
+</div>
+
+<div class="load-more-wrap" id="load-more-wrap">
+    <button class="load-more-btn" id="load-more-btn">
+        Mehr laden
+        <span class="load-more-count" id="load-more-count"></span>
+    </button>
+</div>
+
+<style>
+  .load-more-wrap {
+    display: flex;
+    justify-content: center;
+    padding: var(--sp-10) 0 var(--sp-4);
+  }
+  .load-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-6);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    background: var(--c-surface);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--c-text-secondary);
+    cursor: pointer;
+    transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+  }
+  .load-more-btn:hover {
+    background: var(--c-surface-2);
+    border-color: var(--c-border-strong);
+    color: var(--c-text);
+  }
+  .load-more-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--c-text-tertiary);
+  }
+</style>
+
+<script define:vars={{ PER_PAGE }}>
+    const allItems   = Array.from(document.querySelectorAll('#stream .stream-item'));
+    const loadMoreWrap = document.getElementById('load-more-wrap');
+    const loadMoreBtn  = document.getElementById('load-more-btn');
+    const loadMoreCount = document.getElementById('load-more-count');
+    const filterBtns = document.querySelectorAll('[data-filter]');
+
+    let activeFilter = 'all';
+    let page = 1;
+
+    function getFiltered() {
+        return allItems.filter(item =>
+            activeFilter === 'all' || item.dataset.type === activeFilter
+        );
+    }
+
+    function render() {
+        const filtered = getFiltered();
+        const visible  = page * PER_PAGE;
+
+        allItems.forEach(item => item.classList.add('hidden'));
+        filtered.slice(0, visible).forEach(item => item.classList.remove('hidden'));
+
+        const remaining = Math.max(0, filtered.length - visible);
+        loadMoreWrap.style.display = remaining > 0 ? '' : 'none';
+        loadMoreCount.textContent  = remaining > 0 ? `${remaining} verbleibend` : '';
+    }
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            activeFilter = btn.dataset.filter;
+            page = 1;
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            render();
+        });
+    });
+
+    loadMoreBtn.addEventListener('click', () => {
+        page += 1;
+        render();
+    });
+
+    render();
+</script>

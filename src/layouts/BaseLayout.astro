@@ -1,0 +1,154 @@
+---
+import "../styles/global.css";
+import "@fontsource-variable/sora";
+import "@fontsource/lora/400.css";
+import "@fontsource/lora/600.css";
+import "@fontsource/lora/400-italic.css";
+import "@fontsource-variable/jetbrains-mono";
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+}
+
+const {
+  title,
+  description = 'SAP PM-Berater bei BEW Berliner Energie & Wärme. Daneben: Web-Apps, Nebenprojekte und ein Faible für gute UX.',
+  ogImage = '/og.png',
+  ogType = 'website',
+} = Astro.props;
+
+const pathname = Astro.url.pathname;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
+const ogImageUrl = new URL(ogImage, Astro.site).href;
+const pageTitle = title === 'Home' ? 'frommie.dev' : `${title} — frommie.dev`;
+---
+
+<html lang="de" data-theme="light">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="generator" content={Astro.generator} />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <title>{pageTitle}</title>
+        <link rel="canonical" href={canonicalUrl} />
+        <meta name="description" content={description} />
+
+        <!-- Open Graph -->
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={description} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:type" content={ogType} />
+        <meta property="og:site_name" content="frommie.dev" />
+
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@frommiee" />
+        <meta name="twitter:creator" content="@frommiee" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={ogImageUrl} />
+
+        <!-- Runs synchronously before first paint to prevent light-mode flash -->
+        <script is:inline>
+            (function () {
+                const saved = localStorage.getItem('theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (saved === 'dark' || (!saved && prefersDark)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            })();
+        </script>
+    </head>
+    <body>
+        <!-- ============================================================
+        NAVIGATION
+        ============================================================ -->
+        <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a class="nav-logo" href="/">christian frommert</a>
+
+            <div class="nav-links">
+            <a class={`nav-link always-visible${pathname === '/' ? ' active' : ''}`} href="/" data-page="home">Startseite</a>
+            <a class={`nav-link always-visible${pathname.startsWith('/photos') ? ' active' : ''}`} href="/photos/" data-page="photos">Fotos</a>
+            <a class={`nav-link always-visible${pathname.startsWith('/articles') ? ' active' : ''}`} href="/articles/" data-page="articles">Artikel</a>
+            <a class={`nav-link always-visible${pathname.startsWith('/micros') ? ' active' : ''}`} href="/micros/" data-page="micros">Micros</a>
+            <a class={`nav-link always-visible${pathname.startsWith('/about') ? ' active' : ''}`} href="/about/" data-page="about">Über mich</a>
+            </div>
+
+            <div class="nav-right">
+            <button class="theme-toggle" id="theme-toggle" aria-label="Design umschalten" title="Design umschalten">
+                <svg id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+                </svg>
+                <svg id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+            </div>
+        </div>
+        </nav>
+
+        <slot />
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-inner">
+            <span class="footer-copy">© 2026 christian frommert</span>
+            <div class="footer-links">
+                <a href="mailto:christian.frommert@gmail.com" class="footer-link">Email</a>
+                <a href="/imprint/" class="footer-link">Impressum</a>
+                <a href="/privacy/" class="footer-link">Datenschutz</a>
+            </div>
+            </div>
+        </footer>
+        <!-- Scroll to top -->
+        <button class="scroll-top" id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Nach oben">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+        </button>
+        <script>
+            // ============================================================
+            // THEME TOGGLE
+            // ============================================================
+            const html = document.documentElement;
+            const sunIcon = document.getElementById('icon-sun');
+            const moonIcon = document.getElementById('icon-moon');
+            const toggleBtn = document.getElementById('theme-toggle');
+
+            function toggleTheme() {
+                const isDark = html.getAttribute('data-theme') === 'dark';
+                html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+                localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            }
+
+            toggleBtn?.addEventListener('click', toggleTheme);
+
+            // ============================================================
+            // SCROLL BEHAVIOR
+            // ============================================================
+            const scrollTopBtn = document.getElementById('scroll-top');
+            window.addEventListener('scroll', () => {
+                if (!scrollTopBtn) return;
+                scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+            }, { passive: true });
+
+            // ============================================================
+            // CODE COPY
+            // ============================================================
+            function copyCode(btn: HTMLButtonElement) {
+                const codeBlock = btn.closest('.code-block');
+                const pre = codeBlock?.querySelector('pre');
+                if (!pre) return;
+                navigator.clipboard.writeText(pre.textContent).then(() => {
+                const orig = btn.textContent;
+                btn.textContent = 'Kopiert!';
+                setTimeout(() => { btn.textContent = orig; }, 1500);
+                }).catch(() => {});
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,22 @@
+---
+import BaseLayout        from '../layouts/BaseLayout.astro';
+import ArticleFeed   from '../components/ArticleFeed.astro';
+---
+
+<BaseLayout title="Artikel" description="Artikel über SAP, Webentwicklung und das Bauen von Dingen von Christian Frommert.">
+  <div class="container">
+    <div style="padding: var(--sp-12) 0 var(--sp-24)">
+      <header style="margin-bottom: var(--sp-8)">
+        <h1 style="font-size: var(--text-2xl); font-weight: 600;
+                   letter-spacing: -0.025em; margin-bottom: var(--sp-3)">
+          Artikel
+        </h1>
+        <p style="color: var(--c-text-secondary); font-size: var(--text-base)">
+          Ausführliche Artikel über SAP, Webentwicklung und das Bauen von Dingen.
+        </p>
+      </header>
+
+      <ArticleFeed />
+    </div>
+  </div>
+</BaseLayout>

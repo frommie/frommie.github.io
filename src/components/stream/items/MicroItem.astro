@@ -1,0 +1,10 @@
+---
+// src/components/stream/items/MicroItem.astro
+import StreamItem from "../StreamItem.astro";
+
+const { item } = Astro.props;
+---
+
+<StreamItem type="micro" date={item.publishedAt}>
+  <p class="stream-body">{item.text}</p>
+</StreamItem>

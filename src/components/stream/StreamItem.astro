@@ -1,0 +1,27 @@
+---
+// src/components/stream/StreamItem.astro
+const { type, date } = Astro.props;
+
+const TYPE_LABEL: Record<string, string> = {
+  article: 'Artikel',
+  micro:   'Micro',
+  photo:   'Foto',
+};
+
+function fmtDate(iso?: string): string {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('de-DE', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  });
+}
+---
+
+<article class={`stream-item stream-item--${type}`} data-type={type}>
+  <div class="stream-meta">
+    <span class="stream-type">{TYPE_LABEL[type] ?? type}</span>
+    <span class="stream-dot"></span>
+    <time class="stream-date" datetime={date}>{fmtDate(date)}</time>
+  </div>
+
+  <slot />
+</article>

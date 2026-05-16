@@ -1,0 +1,210 @@
+---
+import {
+  fetchPhotos,
+  effectiveAspectRatio,
+  spanClass,
+  photoImageUrl,
+  lightboxImageUrl,
+  formatExifSummary,
+} from '../lib/photos';
+
+const photos = await fetchPhotos();
+
+function fmtDate(iso?: string) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('de-DE', {
+    month: 'short', day: 'numeric', year: 'numeric',
+  });
+}
+---
+
+<!-- Shot count -->
+<p class="photos-count">{photos.length} Aufnahmen</p>
+
+<!-- Grid — URLs are baked in at build time, no client fetch -->
+<div class="photos-grid" id="photos-grid">
+  {photos.map(photo => {
+    const ratio = effectiveAspectRatio(photo);
+    const span  = spanClass(ratio);
+    const src   = photoImageUrl(photo, span);
+    const date  = fmtDate(photo.publishedAt);
+
+    return (
+      <div
+        class={`pg-item ${span}`}
+        data-caption={photo.caption ?? ''}
+        data-src={src}
+        data-lightbox-src={lightboxImageUrl(photo)}
+        data-meta={[date, photo.camera].filter(Boolean).join(' · ')}
+        data-exif={formatExifSummary(photo.image.exif)}
+      >
+        <img
+          src={src}
+          alt={photo.caption ?? ''}
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="pg-expand-icon">
+            <svg
+                width="12"
+                height="12"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+            >
+                <path d="M6 2H2v4M10 2h4v4M6 14H2v-4M10 14h4v-4"/>
+            </svg>
+        </div>
+        <div class="pg-overlay">
+          <p class="pg-overlay-caption">{photo.caption}</p>
+          <div class="pg-overlay-meta">
+            {date && <span>{date}</span>}
+            {photo.camera && <span>{photo.camera}</span>}
+          </div>
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+<!-- Lightbox markup -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-inner">
+
+    <button id="lightbox-close" class="lightbox-close" aria-label="Schließen">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </button>
+
+    <!-- ← prev / next → -->
+    <button id="lightbox-prev" class="lightbox-nav lightbox-nav--prev" aria-label="Vorheriges Foto">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+
+    <button id="lightbox-next" class="lightbox-nav lightbox-nav--next" aria-label="Nächstes Foto">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </button>
+
+    <div class="lightbox-img-wrap" id="lightbox-img-wrap"></div>
+
+    <div class="lightbox-body">
+      <p class="lightbox-caption" id="lightbox-caption"></p>
+      <div class="lightbox-meta-row">
+        <div class="lightbox-exif-wrap">
+          <div class="lightbox-exif" id="lightbox-exif"></div>
+          <div class="lightbox-meta" id="lightbox-meta"></div>
+        </div>
+        <span class="lightbox-counter" id="lightbox-counter"></span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Client JS: only filters + lightbox, no Sanity fetch needed -->
+<script>
+  // ── DOM refs ────────────────────────────────────────────────────
+  const lightbox   = document.getElementById('lightbox')!;
+  const lbImgWrap  = document.getElementById('lightbox-img-wrap')!;
+  const lbCaption  = document.getElementById('lightbox-caption')!;
+  const lbExif     = document.getElementById('lightbox-exif')!;
+  const lbMeta     = document.getElementById('lightbox-meta')!;
+  const lbCounter  = document.getElementById('lightbox-counter')!;
+  const btnClose   = document.getElementById('lightbox-close')!;
+  const btnPrev    = document.getElementById('lightbox-prev') as HTMLButtonElement;
+  const btnNext    = document.getElementById('lightbox-next') as HTMLButtonElement;
+
+  // ── State ────────────────────────────────────────────────────────
+  // Rebuilt each time the lightbox opens so it always reflects the
+  // current filter state.
+  let visibleItems: HTMLElement[] = [];
+  let currentIndex = -1;
+
+  function getVisibleItems(): HTMLElement[] {
+    return Array.from(
+      document.querySelectorAll<HTMLElement>('.pg-item:not(.hidden)')
+    );
+  }
+
+  // ── Render ───────────────────────────────────────────────────────
+  async function renderLightbox(el: HTMLElement, animate = false) {
+    if (animate) {
+      lbImgWrap.classList.add('is-swapping');
+      await new Promise(r => setTimeout(r, 100));
+    }
+
+    lbImgWrap.innerHTML =
+      `<img src="${el.dataset.lightboxSrc}" alt="${el.dataset.caption ?? ''}" loading="eager">`;
+    lbCaption.textContent = el.dataset.caption ?? '';
+    lbMeta.textContent    = el.dataset.meta    ?? '';
+    lbCounter.textContent = `${currentIndex + 1} / ${visibleItems.length}`;
+
+    lbExif.textContent = el.dataset.exif ?? '';
+
+    // Reflect boundary state in the buttons
+    btnPrev.disabled = currentIndex <= 0;
+    btnNext.disabled = currentIndex >= visibleItems.length - 1;
+
+    if (animate) lbImgWrap.classList.remove('is-swapping');
+  }
+
+  // ── Open / close ─────────────────────────────────────────────────
+  function openLightbox(el: HTMLElement) {
+    visibleItems  = getVisibleItems();
+    currentIndex  = visibleItems.indexOf(el);
+
+    renderLightbox(el);
+
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // ── Navigate ─────────────────────────────────────────────────────
+  function navigate(dir: 1 | -1) {
+    const next = currentIndex + dir;
+    if (next < 0 || next >= visibleItems.length) return;
+    currentIndex = next;
+    renderLightbox(visibleItems[currentIndex], true);
+  }
+
+  // ── Event listeners ──────────────────────────────────────────────
+  btnClose.addEventListener('click', closeLightbox);
+  btnPrev.addEventListener('click',  () => navigate(-1));
+  btnNext.addEventListener('click',  () => navigate(+1));
+
+  lightbox.addEventListener('click', e => {
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'ArrowLeft')  navigate(-1);
+    if (e.key === 'ArrowRight') navigate(+1);
+    if (e.key === 'Escape')     closeLightbox();
+  });
+
+  // Grid click — open on any pg-item
+  document.getElementById('photos-grid')!
+    .addEventListener('click', e => {
+      const item = (e.target as Element).closest<HTMLElement>('.pg-item');
+      if (item) openLightbox(item);
+    });
+
+</script>

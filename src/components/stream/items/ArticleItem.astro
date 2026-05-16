@@ -1,0 +1,29 @@
+---
+// src/components/stream/items/ArticleItem.astro
+import StreamItem from "../StreamItem.astro";
+
+const { item } = Astro.props;
+---
+
+<StreamItem type="article" date={item.publishedAt}>
+  <h2 class="article-title">
+    <a href={`/articles/${item.slug.current}`}>
+      {item.title}
+    </a>
+  </h2>
+  <p class="article-excerpt">
+    {item.excerpt}
+  </p>
+  <div class="article-footer">
+    <div class="article-tags">
+      {(item.tags ?? []).map((tag: string) => (
+        <a class="tag" href={`/articles/tags/${tag}`}>#{tag}</a>
+      ))}
+    </div>
+    <span class="read-more">
+      <a href={`/articles/${item.slug.current}`}>
+        Artikel lesen <span class="read-more-arrow">→</span>
+      </a>
+    </span>
+  </div>
+</StreamItem>

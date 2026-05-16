@@ -1,0 +1,95 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Impressum" description="Impressum für frommie.dev.">
+  <div class="container">
+    <div class="legal-page">
+      <h1 class="legal-heading">Impressum</h1>
+      <p class="legal-note">Angaben gemäß § 5 DDG</p>
+
+      <section class="legal-section">
+        <h2>Kontakt</h2>
+        <p>
+          Christian Frommert<br />
+          Hammstraße 11<br />
+          04129 Leipzig<br />
+          Deutschland
+        </p>
+        <p>
+          E-Mail: <a href="mailto:christian.frommert@gmail.com">christian.frommert@gmail.com</a>
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>Art der Website</h2>
+        <p>Dies ist eine private, nicht-kommerzielle Privatpersonen-Website.</p>
+      </section>
+
+      <section class="legal-section">
+        <h2>Haftungsausschluss</h2>
+        <p>
+          Trotz sorgfältiger inhaltlicher Kontrolle übernehme ich keine Haftung für die Inhalte
+          externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber
+          verantwortlich.
+        </p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .legal-page {
+    max-width: 640px;
+    padding: var(--sp-12) 0 var(--sp-24);
+  }
+
+  .legal-heading {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    margin-bottom: var(--sp-2);
+  }
+
+  .legal-heading-sub {
+    font-weight: 300;
+    color: var(--c-text-tertiary);
+  }
+
+  .legal-note {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--c-text-tertiary);
+    letter-spacing: 0.04em;
+    margin-bottom: var(--sp-10);
+  }
+
+  .legal-section {
+    margin-bottom: var(--sp-8);
+  }
+
+  .legal-section h2 {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--c-text-tertiary);
+    margin-bottom: var(--sp-3);
+  }
+
+  .legal-section p {
+    font-size: var(--text-md);
+    color: var(--c-text-secondary);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--sp-3);
+  }
+
+  .legal-section a {
+    color: var(--c-accent);
+    text-decoration: none;
+  }
+
+  .legal-section a:hover {
+    text-decoration: underline;
+  }
+</style>
