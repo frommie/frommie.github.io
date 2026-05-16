@@ -89,7 +89,24 @@ const pageTitle = title === 'Home' ? 'frommie.dev' : `${title} — frommie.dev`;
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                 </svg>
             </button>
+            <button class="nav-menu-btn" id="nav-menu-btn" aria-label="Menü öffnen" aria-expanded="false">
+                <svg class="icon-hamburger" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                <svg class="icon-close" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+            </button>
             </div>
+        </div>
+
+        <!-- Mobile dropdown -->
+        <div class="nav-mobile" id="nav-mobile">
+            <a class={`nav-mobile-link${pathname === '/' ? ' active' : ''}`} href="/">Startseite</a>
+            <a class={`nav-mobile-link${pathname.startsWith('/photos') ? ' active' : ''}`} href="/photos/">Fotos</a>
+            <a class={`nav-mobile-link${pathname.startsWith('/articles') ? ' active' : ''}`} href="/articles/">Artikel</a>
+            <a class={`nav-mobile-link${pathname.startsWith('/micros') ? ' active' : ''}`} href="/micros/">Micros</a>
+            <a class={`nav-mobile-link${pathname.startsWith('/about') ? ' active' : ''}`} href="/about/">Über mich</a>
         </div>
         </nav>
 
@@ -126,6 +143,28 @@ const pageTitle = title === 'Home' ? 'frommie.dev' : `${title} — frommie.dev`;
             }
 
             toggleBtn?.addEventListener('click', toggleTheme);
+
+            // ============================================================
+            // MOBILE NAV
+            // ============================================================
+            const menuBtn    = document.getElementById('nav-menu-btn');
+            const mobileNav  = document.getElementById('nav-mobile');
+
+            menuBtn?.addEventListener('click', () => {
+                const isOpen = mobileNav?.classList.toggle('open');
+                menuBtn.classList.toggle('open', isOpen);
+                menuBtn.setAttribute('aria-expanded', String(!!isOpen));
+                menuBtn.setAttribute('aria-label', isOpen ? 'Menü schließen' : 'Menü öffnen');
+            });
+
+            mobileNav?.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileNav.classList.remove('open');
+                    menuBtn?.classList.remove('open');
+                    menuBtn?.setAttribute('aria-expanded', 'false');
+                    menuBtn?.setAttribute('aria-label', 'Menü öffnen');
+                });
+            });
 
             // ============================================================
             // SCROLL BEHAVIOR
