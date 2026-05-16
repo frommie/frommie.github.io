@@ -68,7 +68,22 @@ export function lightboxImageUrl(photo: SanityPhoto): string {
 export function photoImageUrl(photo: SanityPhoto, span: string): string {
   const w = span === 'pg-wide' ? 960 : 470;
   const h = span === 'pg-tall' ? 800 : 400;
-  return urlFor(photo.image).width(w).height(h).fit('crop').url();
+  return urlFor(photo.image).width(w).height(h).fit('crop').auto('format').quality(80).url();
+}
+
+export function photoSrcSet(photo: SanityPhoto, span: string): string {
+  const isWide = span === 'pg-wide';
+  const isTall = span === 'pg-tall';
+  const baseW  = isWide ? 960 : 470;
+  const baseH  = isTall ? 800 : 400;
+  const ratio  = baseH / baseW;
+  const widths = isWide ? [400, 700, 960] : [300, 470];
+  return widths
+    .map(w => {
+      const h = Math.round(w * ratio);
+      return `${urlFor(photo.image).width(w).height(h).fit('crop').auto('format').quality(80).url()} ${w}w`;
+    })
+    .join(', ');
 }
 
 export function effectiveAspectRatio(photo: SanityPhoto): number {

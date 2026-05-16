@@ -4,6 +4,7 @@ import {
   effectiveAspectRatio,
   spanClass,
   photoImageUrl,
+  photoSrcSet,
   lightboxImageUrl,
   formatExifSummary,
 } from '../lib/photos';
@@ -24,10 +25,14 @@ function fmtDate(iso?: string) {
 <!-- Grid — URLs are baked in at build time, no client fetch -->
 <div class="photos-grid" id="photos-grid">
   {photos.map(photo => {
-    const ratio = effectiveAspectRatio(photo);
-    const span  = spanClass(ratio);
-    const src   = photoImageUrl(photo, span);
-    const date  = fmtDate(photo.publishedAt);
+    const ratio  = effectiveAspectRatio(photo);
+    const span   = spanClass(ratio);
+    const src    = photoImageUrl(photo, span);
+    const srcset = photoSrcSet(photo, span);
+    const sizes  = span === 'pg-wide'
+      ? '(max-width: 640px) 100vw, (max-width: 1100px) 65vw, 730px'
+      : '(max-width: 640px) 100vw, (max-width: 1100px) 32vw, 360px';
+    const date   = fmtDate(photo.publishedAt);
 
     return (
       <div
@@ -40,6 +45,8 @@ function fmtDate(iso?: string) {
       >
         <img
           src={src}
+          srcset={srcset}
+          sizes={sizes}
           alt={photo.caption ?? ''}
           loading="lazy"
           decoding="async"

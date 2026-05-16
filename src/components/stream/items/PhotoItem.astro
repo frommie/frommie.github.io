@@ -4,14 +4,17 @@ import StreamItem from "../StreamItem.astro";
 import {urlFor} from '../../../lib/image'
 
 const { item } = Astro.props;
+
+const widths = [400, 700, 960, 1400];
+const src = urlFor(item.image).width(960).auto('format').quality(80).url();
+const srcset = widths
+  .map(w => `${urlFor(item.image).width(w).auto('format').quality(80).url()} ${w}w`)
+  .join(', ');
+const sizes = '(max-width: 640px) 100vw, min(900px, calc(100vw - 3rem))';
 ---
 <StreamItem type="photo" date={item.publishedAt}>
   <figure>
-    <img src={urlFor(item.image)
-    .width(1400)
-    .auto("format")
-    .quality(80)
-    .url()} alt={item.caption ?? ''} />
+    <img src={src} srcset={srcset} sizes={sizes} alt={item.caption ?? ''} />
     {item.caption && <figcaption>{item.caption}</figcaption>}
   </figure>
 </StreamItem>
