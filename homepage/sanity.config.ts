@@ -19,7 +19,7 @@ export default defineConfig({
             S.documentTypeListItem('photo'),
             S.documentTypeListItem('micro'),
             S.documentTypeListItem('article'),
-
+            S.documentTypeListItem('now'),
             S.listItem()
               .title('Site Settings')
               .child(

@@ -24,6 +24,7 @@ export interface SanityPhoto {
     asset: {
       _id: string;
       metadata: {
+        lqip?: string;
         dimensions: {
           width:  number;
           height: number;
@@ -47,6 +48,7 @@ export const PHOTOS_QUERY = `
       asset->{
         _id,
         metadata {
+          lqip,
           dimensions { width, height, aspectRatio }
         }
       }
@@ -65,24 +67,16 @@ export function lightboxImageUrl(photo: SanityPhoto): string {
     .url();
 }
 
-export function photoImageUrl(photo: SanityPhoto, span: string): string {
-  const w = span === 'pg-wide' ? 960 : 470;
-  const h = span === 'pg-tall' ? 800 : 400;
-  return urlFor(photo.image).width(w).height(h).fit('crop').auto('format').quality(80).url();
+/* Width-only URLs — the photo keeps its true (editor-cropped) aspect ratio,
+   the justified grid adapts to the photo instead of cropping it. */
+export function photoImageUrl(photo: SanityPhoto, width = 700): string {
+  return urlFor(photo.image).width(width).fit('max').auto('format').quality(80).url();
 }
 
-export function photoSrcSet(photo: SanityPhoto, span: string): string {
-  const isWide = span === 'pg-wide';
-  const isTall = span === 'pg-tall';
-  const baseW  = isWide ? 960 : 470;
-  const baseH  = isTall ? 800 : 400;
-  const ratio  = baseH / baseW;
-  const widths = isWide ? [400, 700, 960] : [300, 470];
+export function photoSrcSet(photo: SanityPhoto): string {
+  const widths = [320, 480, 700, 960];
   return widths
-    .map(w => {
-      const h = Math.round(w * ratio);
-      return `${urlFor(photo.image).width(w).height(h).fit('crop').auto('format').quality(80).url()} ${w}w`;
-    })
+    .map(w => `${urlFor(photo.image).width(w).fit('max').auto('format').quality(80).url()} ${w}w`)
     .join(', ');
 }
 
@@ -98,17 +92,20 @@ export function effectiveAspectRatio(photo: SanityPhoto): number {
   return baseRatio * (wFactor / hFactor);
 }
 
-export function spanClass(ratio: number): 'pg-tall' | 'pg-wide' | '' {
-  if (ratio < 0.80) return 'pg-tall';
-  if (ratio > 1.65) return 'pg-wide';
-  return '';
-}
-
+/* Per DESIGN.md: "ƒ/2.8 · 1/250s · ISO 200 · 35mm" — middle dot separators,
+   normalised regardless of how the values were entered in Sanity. */
 export function formatExifSummary(exif?: PhotoExif | null): string {
   if (!exif) return '';
+  const aperture = exif.aperture
+    ? `ƒ/${String(exif.aperture).replace(/^[fƒ]\s*\/?\s*/i, '')}`
+    : null;
+  const shutter = exif.shutterSpeed
+    ? (/s$/i.test(exif.shutterSpeed) ? exif.shutterSpeed : `${exif.shutterSpeed}s`)
+    : null;
   return [
-    exif.aperture,
-    exif.shutterSpeed,
+    aperture,
+    shutter,
     exif.iso ? `ISO ${exif.iso}` : null,
+    exif.focalLength ? `${exif.focalLength}mm` : null,
   ].filter(Boolean).join(' · ');
 }

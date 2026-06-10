@@ -54,10 +54,12 @@ The `stream/` component tree handles the homepage mixed feed:
 
 ### Styling
 
+**`DESIGN.md` is the binding design system — consult it before any UI work.** It defines the philosophy (personal, editorial, warm — explicitly *not* SaaS-styled), all tokens, component specs, and anti-patterns. Personality elements (serif display headlines, EXIF rows, handmade accents, first-person microcopy) are part of the system and must not be "cleaned up".
+
 All styles use CSS custom properties defined in `src/styles/global.css`. Theme switching (light/dark) is driven by `data-theme` on `<html>`, toggled via `localStorage`. No CSS framework — all styles are scoped within component `<style>` blocks or the global file.
 
 Fonts loaded from Google Fonts: **Sora** (sans), **Lora** (serif), **JetBrains Mono** (mono).
 
 ### Sanity Studio
 
-The `homepage/` directory is a standalone Sanity Studio v3 project. The `schemaTypes/index.ts` currently exports an empty array — schemas are managed directly in the Sanity dashboard, not in code.
+The `homepage/` directory is a standalone Sanity Studio v3 project. Schemas live in code under `homepage/schemaTypes/` (`article`, `micro`, `photo`, `siteSettings`, `now`) and are registered in `schemaTypes/index.ts`. Schema changes require redeploying the Studio (`cd homepage && npm run deploy`) or running it locally.

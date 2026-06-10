@@ -15,6 +15,11 @@ export const streamQuery = `
   image {
     crop,
     hotspot,
+    exif {
+      make, model, lens,
+      focalLength, aperture, shutterSpeed,
+      iso, takenAt
+    },
     asset->{
       url,
 

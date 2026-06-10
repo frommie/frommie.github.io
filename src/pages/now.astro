@@ -1,0 +1,160 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { fetchNow, fmtNowDate } from '../lib/now';
+import { processBody } from '../lib/micro';
+
+const now = await fetchNow();
+---
+
+<BaseLayout
+  title="Jetzt"
+  description="Was mich gerade beschäftigt — Projekte, Bücher, Fotos. Eine Now-Seite, regelmäßig aktualisiert."
+>
+  <div class="container">
+    <div class="now-page">
+      <header class="now-header">
+        <h1 class="page-title">Jetzt</h1>
+        <p class="now-subtitle">
+          Was mich gerade beschäftigt — die Langform von „Was machst du so?".
+        </p>
+        {now?.updatedAt && (
+          <p class="now-updated">Stand: {fmtNowDate(now.updatedAt)}</p>
+        )}
+      </header>
+
+      {now?.intro && <p class="now-intro">{now.intro}</p>}
+
+      {now?.sections?.length ? (
+        <div class="now-sections">
+          {now.sections.map(section => (
+            <section class="now-section">
+              <div class="now-section-header">
+                <span class="now-section-label">{section.label}</span>
+                <span class="now-section-line"></span>
+              </div>
+              <ul class="now-list">
+                {(section.items ?? []).map(item => (
+                  <li set:html={processBody(item)} />
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <p class="now-empty">
+          Hier steht bald, was mich gerade beschäftigt. Bis dahin: der
+          <a href="/">Stream</a> ist aktueller, als diese Seite je sein wird.
+        </p>
+      )}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .now-page {
+    padding: var(--sp-12) 0 var(--sp-24);
+    max-width: 600px;
+  }
+
+  .now-header {
+    margin-bottom: var(--sp-10);
+  }
+
+  .now-subtitle {
+    font-size: var(--text-base);
+    color: var(--c-text-secondary);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--sp-3);
+  }
+
+  .now-updated {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--c-text-tertiary);
+    letter-spacing: 0.03em;
+  }
+
+  .now-intro {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-md);
+    color: var(--c-text);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--sp-10);
+  }
+
+  .now-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-10);
+  }
+
+  .now-section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+  }
+
+  .now-section-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-text-secondary);
+    white-space: nowrap;
+  }
+
+  .now-section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--c-border);
+  }
+
+  .now-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+
+  .now-list li {
+    position: relative;
+    padding-left: var(--sp-5);
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--c-text);
+  }
+
+  .now-list li::before {
+    content: '–';
+    position: absolute;
+    left: 0;
+    color: var(--c-accent);
+  }
+
+  .now-list li :global(p) {
+    display: inline;
+  }
+
+  .now-list li :global(a),
+  .now-empty a {
+    color: var(--c-accent);
+    text-decoration: underline;
+    text-decoration-color: var(--c-accent-subtle);
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--t-fast);
+  }
+
+  .now-list li :global(a:hover),
+  .now-empty a:hover {
+    text-decoration-color: var(--c-accent);
+  }
+
+  .now-empty {
+    font-size: var(--text-base);
+    color: var(--c-text-secondary);
+    line-height: var(--leading-relaxed);
+  }
+</style>

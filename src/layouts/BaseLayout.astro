@@ -15,7 +15,7 @@ interface Props {
 
 const {
   title,
-  description = 'SAP PM-Berater bei BEW Berliner Energie & Wärme. Daneben: Web-Apps, Nebenprojekte und ein Faible für gute UX.',
+  description = 'Persönliche Website von Christian Frommert — SAP-EAM-Berater bei BEW Berliner Energie & Wärme. Fotos, kurze Gedanken und Artikel über SAP, Webentwicklung und gute UX.',
   ogImage = '/og.png',
   ogType = 'website',
 } = Astro.props;
@@ -117,11 +117,17 @@ const pageTitle = title === 'Home' ? 'frommie.dev' : `${title} — frommie.dev`;
             <div class="footer-inner">
             <span class="footer-copy">© 2026 christian frommert</span>
             <div class="footer-links">
-                <a href="mailto:christian.frommert@gmail.com" class="footer-link">Email</a>
+                <a href="/now/" class="footer-link">Jetzt</a>
+                <a href="mailto:christian.frommert@gmail.com" class="footer-link">E-Mail</a>
                 <a href="/imprint/" class="footer-link">Impressum</a>
                 <a href="/privacy/" class="footer-link">Datenschutz</a>
             </div>
             </div>
+            <p class="footer-colophon">
+                Von Hand gebaut mit <a href="https://astro.build" target="_blank" rel="noopener">Astro</a> &amp;
+                <a href="https://www.sanity.io" target="_blank" rel="noopener">Sanity</a>,
+                gesetzt in Lora, Sora &amp; JetBrains Mono.
+            </p>
         </footer>
         <!-- Scroll to top -->
         <button class="scroll-top" id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Nach oben">

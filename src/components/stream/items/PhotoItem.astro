@@ -2,8 +2,10 @@
 // src/components/stream/items/PhotoItem.astro
 import StreamItem from "../StreamItem.astro";
 import {urlFor} from '../../../lib/image'
+import { formatExifSummary } from '../../../lib/photos';
 
 const { item } = Astro.props;
+const exifSummary = formatExifSummary(item.image?.exif);
 
 const widths = [400, 700, 960, 1400];
 const src = urlFor(item.image).width(960).auto('format').quality(80).url();
@@ -16,6 +18,7 @@ const sizes = '(max-width: 640px) 100vw, min(900px, calc(100vw - 3rem))';
   <figure>
     <img src={src} srcset={srcset} sizes={sizes} alt={item.caption ?? ''} />
     {item.caption && <figcaption>{item.caption}</figcaption>}
+    {exifSummary && <div class="photo-exif">{exifSummary}</div>}
   </figure>
 </StreamItem>
 
@@ -34,6 +37,11 @@ const sizes = '(max-width: 640px) 100vw, min(900px, calc(100vw - 3rem))';
     font-size: var(--text-sm);
     color: var(--c-text-tertiary);
     line-height: var(--leading-relaxed);
+    padding-left: var(--sp-1);
+  }
+
+  figure .photo-exif {
+    margin-top: var(--sp-2);
     padding-left: var(--sp-1);
   }
 </style>

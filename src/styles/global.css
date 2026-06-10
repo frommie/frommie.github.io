@@ -62,35 +62,37 @@
    ============================================================ */
 
 [data-theme="light"] {
-  --c-bg:           #fafafa;
-  --c-surface:      #ffffff;
-  --c-surface-2:    #f5f5f5;
-  --c-surface-3:    #efefef;
+  /* Warm paper — never pure neutral grey */
+  --c-bg:           #faf8f4;
+  --c-surface:      #fffefb;
+  --c-surface-2:    #f3f0ea;
+  --c-surface-3:    #ebe7df;
 
-  --c-border:       #e5e5e5;
-  --c-border-strong:#d0d0d0;
+  --c-border:       #e5e0d6;
+  --c-border-strong:#d1cabd;
 
-  --c-text:         #111111;
-  --c-text-secondary:#6b6b6b;
-  --c-text-tertiary: #666666;
+  --c-text:         #1c1813;
+  --c-text-secondary:#6e675d;
+  --c-text-tertiary: #696258;
 
-  --c-accent:       #2f54eb;
-  --c-accent-hover: #1d3fbf;
-  --c-accent-subtle:#eef1fd;
-  --c-accent-text:  #2244cc;
+  /* Terracotta — the only chromatic colour */
+  --c-accent:       #b34a22;
+  --c-accent-hover: #93391a;
+  --c-accent-subtle:#f7e8df;
+  --c-accent-text:  #9c3e1c;
 
-  --c-code-bg:      #f4f4f4;
-  --c-code-text:    #cc3366;
+  --c-code-bg:      #f3efe8;
+  --c-code-text:    #a04a28;
 
-  --c-tag-bg:       #f0f0f0;
-  --c-tag-text:     #555555;
+  --c-tag-bg:       #f0ece4;
+  --c-tag-text:     #5a5348;
 
-  --c-callout-info-bg:   #eef1fd;
-  --c-callout-info-border:#c5cff7;
-  --c-callout-note-bg:   #fefce8;
-  --c-callout-note-border:#fde047;
-  --c-callout-warn-bg:   #fff4f0;
-  --c-callout-warn-border:#f97316;
+  --c-callout-info-bg:   #f7e8df;
+  --c-callout-info-border:#e8c4ae;
+  --c-callout-note-bg:   #faf3dc;
+  --c-callout-note-border:#e3cd7a;
+  --c-callout-warn-bg:   #fbeae6;
+  --c-callout-warn-border:#d9583b;
 }
 
 /* ============================================================
@@ -98,35 +100,37 @@
    ============================================================ */
 
 [data-theme="dark"] {
-  --c-bg:           #0d0d0d;
-  --c-surface:      #141414;
-  --c-surface-2:    #1a1a1a;
-  --c-surface-3:    #212121;
+  /* Blue hour — very dark blue, not black. Text stays warm cream so the
+     terracotta accent and the photos keep their warmth on the cool base. */
+  --c-bg:           #10141d;
+  --c-surface:      #151a26;
+  --c-surface-2:    #1b2130;
+  --c-surface-3:    #222939;
 
-  --c-border:       #262626;
-  --c-border-strong:#333333;
+  --c-border:       #283042;
+  --c-border-strong:#364056;
 
-  --c-text:         #f0f0f0;
-  --c-text-secondary:#888888;
-  --c-text-tertiary: #808080;
+  --c-text:         #f0ede6;
+  --c-text-secondary:#9299a8;
+  --c-text-tertiary: #8a91a2;
 
-  --c-accent:       #5b81ff;
-  --c-accent-hover: #7b9aff;
-  --c-accent-subtle:#1a2140;
-  --c-accent-text:  #7b9aff;
+  --c-accent:       #e07b50;
+  --c-accent-hover: #ec936c;
+  --c-accent-subtle:#33231b;
+  --c-accent-text:  #e8946a;
 
-  --c-code-bg:      #1e1e1e;
-  --c-code-text:    #ff6b9d;
+  --c-code-bg:      #181e2b;
+  --c-code-text:    #e8946a;
 
-  --c-tag-bg:       #1e1e1e;
-  --c-tag-text:     #aaaaaa;
+  --c-tag-bg:       #1b2130;
+  --c-tag-text:     #aab0bd;
 
-  --c-callout-info-bg:   #111827;
-  --c-callout-info-border:#2f54eb;
-  --c-callout-note-bg:   #1a180a;
+  --c-callout-info-bg:   #2b1c14;
+  --c-callout-info-border:#b34a22;
+  --c-callout-note-bg:   #221d0d;
   --c-callout-note-border:#ca8a04;
-  --c-callout-warn-bg:   #1a0f08;
-  --c-callout-warn-border:#ea580c;
+  --c-callout-warn-bg:   #2a130f;
+  --c-callout-warn-border:#d9583b;
 }
 
 /* ============================================================
@@ -170,7 +174,9 @@ img {
    TYPOGRAPHY SYSTEM
    ============================================================ */
 
-.t-h1 { font-size: var(--text-4xl); font-weight: 600; letter-spacing: -0.03em; line-height: var(--leading-tight); }
+/* Display headings (H1 level) use the serif — the site's editorial voice.
+   Serif needs less negative tracking than sans: -0.01em, not -0.03em. */
+.t-h1 { font-family: var(--font-serif); font-size: var(--text-4xl); font-weight: 600; letter-spacing: -0.01em; line-height: var(--leading-tight); }
 .t-h2 { font-size: var(--text-3xl); font-weight: 600; letter-spacing: -0.025em; line-height: var(--leading-tight); }
 .t-h3 { font-size: var(--text-2xl); font-weight: 600; letter-spacing: -0.02em; line-height: var(--leading-snug); }
 .t-h4 { font-size: var(--text-xl);  font-weight: 500; letter-spacing: -0.015em; line-height: var(--leading-snug); }
@@ -188,6 +194,16 @@ img {
   max-width: var(--content-width);
   margin: 0 auto;
   padding: 0 var(--sp-6);
+}
+
+/* Page-level H1 for section pages (Fotos, Artikel, Micros, …) */
+.page-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: var(--leading-tight);
+  margin-bottom: var(--sp-3);
 }
 
 .page {
@@ -387,9 +403,10 @@ img {
 }
  
 .hero-name {
+  font-family: var(--font-serif);
   font-size: clamp(var(--text-2xl), 4.5vw, var(--text-3xl));
   font-weight: 600;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.01em;
   line-height: var(--leading-tight);
   margin-bottom: var(--sp-5);
 }
@@ -712,6 +729,15 @@ img {
   padding-top: var(--sp-2);
 }
 
+/* EXIF metadata row — content on a photography site, not clutter.
+   Format: "ƒ/2.8 · 1/250s · ISO 200 · 35mm" */
+.photo-exif {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--c-text-tertiary);
+  letter-spacing: 0.03em;
+}
+
 /* ============================================================
    STREAM ITEM — ARTICLE
    ============================================================ */
@@ -801,10 +827,11 @@ img {
 }
 
 .article-h1 {
+  font-family: var(--font-serif);
   font-size: clamp(var(--text-2xl), 4vw, var(--text-4xl));
   font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
   margin-bottom: var(--sp-5);
 }
 
@@ -834,13 +861,13 @@ img {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--c-accent) 0%, #7c3aed 100%);
+  background: var(--c-accent);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   color: #fff;
 }
 
@@ -975,11 +1002,11 @@ img {
   margin: 0;
 }
 
-.code-block pre .kw { color: #5b81ff; }
-.code-block pre .fn { color: #61d4b3; }
-.code-block pre .str { color: #f4a261; }
+.code-block pre .kw { color: #c06038; }
+.code-block pre .fn { color: #4f9e83; }
+.code-block pre .str { color: #b08a3e; }
 .code-block pre .cm { color: var(--c-text-tertiary); font-style: italic; }
-.code-block pre .num { color: #c084fc; }
+.code-block pre .num { color: #9c6bb8; }
 .code-block pre .op { color: var(--c-text-secondary); }
 
 /* ============================================================
@@ -1027,7 +1054,7 @@ img {
   background: var(--c-callout-warn-bg);
   border: 1px solid var(--c-callout-warn-border);
 }
-.callout--warning .callout-title { color: #ea580c; }
+.callout--warning .callout-title { color: #d9583b; }
 
 /* ============================================================
    FOOTER
@@ -1067,6 +1094,29 @@ img {
   cursor: pointer;
 }
 .footer-link:hover { color: var(--c-text); }
+
+/* Colophon — the "made by a person" line */
+.footer-colophon {
+  max-width: var(--content-width);
+  margin: var(--sp-4) auto 0;
+  padding: 0 var(--sp-6);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--c-text-tertiary);
+  letter-spacing: 0.02em;
+  line-height: var(--leading-normal);
+}
+.footer-colophon a {
+  color: var(--c-text-secondary);
+  text-decoration: underline;
+  text-decoration-color: var(--c-border-strong);
+  text-underline-offset: 2px;
+  transition: color var(--t-fast), text-decoration-color var(--t-fast);
+}
+.footer-colophon a:hover {
+  color: var(--c-accent);
+  text-decoration-color: var(--c-accent);
+}
 
 /* ============================================================
    DIVIDER / UTILITY
@@ -1215,9 +1265,10 @@ img {
 }
 
 .photos-title {
+  font-family: var(--font-serif);
   font-size: var(--text-2xl);
   font-weight: 600;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.01em;
 }
 
 .photos-toolbar {
@@ -1284,39 +1335,47 @@ img {
   flex-shrink: 0;
 }
 
-/* ── Masonry grid ── */
+/* ── Justified grid ──
+   Photos keep their true aspect ratio — the layout adapts to the photo,
+   never the other way around. Each cell carries its ratio as `--ratio`
+   (set at build time); flex-grow distributes row space so every photo in
+   a row ends up the same height, uncropped. */
 .photos-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 196px;
+  --row-h: 220px;      /* target row height */
+  --row-h-max: 420px;  /* cap for stretched last-row items */
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--sp-3);
 }
-
-/* Span utilities */
-.pg-wide  { grid-column: span 2; }
-.pg-tall  { grid-row: span 2; }
-.pg-feat  { grid-column: span 2; grid-row: span 2; }
 
 /* ── Photo cell ── */
 .pg-item {
   position: relative;
+  aspect-ratio: var(--ratio, 1);
+  flex-grow: calc(var(--ratio, 1) * 100);
+  flex-basis: calc(var(--ratio, 1) * var(--row-h));
+  max-width: min(100%, calc(var(--ratio, 1) * var(--row-h-max)));
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--c-border);
   background: var(--c-surface-2);
+  background-size: cover;     /* LQIP blur-up placeholder */
+  background-position: center;
   cursor: pointer;
   transition: border-color var(--t-fast);
 }
 .pg-item:hover { border-color: var(--c-border-strong); }
 
-/* Real image */
+/* Real image — fades in over the LQIP once loaded */
 .pg-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 600ms var(--ease);
+  opacity: 0;
+  transition: opacity 400ms var(--ease), transform 600ms var(--ease);
 }
+.pg-item img.loaded { opacity: 1; }
 .pg-item:hover img { transform: scale(1.04); }
 
 /* Placeholder */
@@ -1362,8 +1421,9 @@ img {
 
 .pg-overlay-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--sp-1) var(--sp-3);
   font-size: var(--text-xs);
   color: rgba(255,255,255,0.65);
   font-family: var(--font-mono);
@@ -1623,12 +1683,9 @@ img {
 /* Responsive */
 @media (max-width: 560px) {
   .photos-grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: 150px;
+    --row-h: 140px;
+    --row-h-max: 320px;
   }
-  .pg-feat  { grid-column: span 2; grid-row: span 1; }
-  .pg-wide  { grid-column: span 2; }
-  .pg-tall  { grid-row: span 2; }
 }
 
 /* ============================================================
@@ -1638,11 +1695,10 @@ img {
 @media (max-width: 640px) {
   .nav-links { display: none; }
   .nav-menu-btn { display: flex; }
-  .photos-grid { grid-template-columns: 1fr; }
-  .photo-card.large { grid-column: span 1; }
   .article-footer { flex-direction: column; align-items: flex-start; gap: var(--sp-4); }
   .work-item { flex-direction: column; gap: var(--sp-1); }
   .footer-inner { flex-direction: column; text-align: center; }
+  .footer-colophon { text-align: center; }
 }
 
 /* ============================================================

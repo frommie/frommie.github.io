@@ -2,7 +2,6 @@
 import {
   fetchPhotos,
   effectiveAspectRatio,
-  spanClass,
   photoImageUrl,
   photoSrcSet,
   lightboxImageUrl,
@@ -26,22 +25,22 @@ function fmtDate(iso?: string) {
 <div class="photos-grid" id="photos-grid">
   {photos.map(photo => {
     const ratio  = effectiveAspectRatio(photo);
-    const span   = spanClass(ratio);
-    const src    = photoImageUrl(photo, span);
-    const srcset = photoSrcSet(photo, span);
-    const sizes  = span === 'pg-wide'
-      ? '(max-width: 640px) 100vw, (max-width: 1100px) 65vw, 730px'
-      : '(max-width: 640px) 100vw, (max-width: 1100px) 32vw, 360px';
+    const src    = photoImageUrl(photo);
+    const srcset = photoSrcSet(photo);
+    const sizes  = '(max-width: 760px) 60vw, 400px';
     const date   = fmtDate(photo.publishedAt);
+    const exif   = formatExifSummary(photo.image.exif);
+    const lqip   = photo.image.asset?.metadata?.lqip;
 
     return (
       <div
-        class={`pg-item ${span}`}
+        class="pg-item"
+        style={`--ratio: ${ratio.toFixed(4)};${lqip ? ` background-image: url(${lqip});` : ''}`}
+        data-id={photo._id}
         data-caption={photo.caption ?? ''}
-        data-src={src}
         data-lightbox-src={lightboxImageUrl(photo)}
         data-meta={[date, photo.camera].filter(Boolean).join(' · ')}
-        data-exif={formatExifSummary(photo.image.exif)}
+        data-exif={exif}
       >
         <img
           src={src}
@@ -50,6 +49,7 @@ function fmtDate(iso?: string) {
           alt={photo.caption ?? ''}
           loading="lazy"
           decoding="async"
+          onload="this.classList.add('loaded')"
         />
         <div class="pg-expand-icon">
             <svg
@@ -71,6 +71,7 @@ function fmtDate(iso?: string) {
           <div class="pg-overlay-meta">
             {date && <span>{date}</span>}
             {photo.camera && <span>{photo.camera}</span>}
+            {exif && <span>{exif}</span>}
           </div>
         </div>
       </div>
@@ -165,14 +166,26 @@ function fmtDate(iso?: string) {
     btnNext.disabled = currentIndex >= visibleItems.length - 1;
 
     if (animate) lbImgWrap.classList.remove('is-swapping');
+
+    // Preload neighbours so prev/next swaps are instant
+    [currentIndex - 1, currentIndex + 1].forEach(i => {
+      const src = visibleItems[i]?.dataset.lightboxSrc;
+      if (src) new Image().src = src;
+    });
   }
 
   // ── Open / close ─────────────────────────────────────────────────
+  // The open photo is reflected in the URL hash (#p=<id>) so individual
+  // photos are linkable. replaceState avoids polluting history.
   function openLightbox(el: HTMLElement) {
     visibleItems  = getVisibleItems();
     currentIndex  = visibleItems.indexOf(el);
 
     renderLightbox(el);
+
+    if (el.dataset.id) {
+      history.replaceState(null, '', `#p=${el.dataset.id}`);
+    }
 
     lightbox.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -181,6 +194,7 @@ function fmtDate(iso?: string) {
   function closeLightbox() {
     lightbox.classList.remove('open');
     document.body.style.overflow = '';
+    history.replaceState(null, '', window.location.pathname + window.location.search);
   }
 
   // ── Navigate ─────────────────────────────────────────────────────
@@ -188,7 +202,9 @@ function fmtDate(iso?: string) {
     const next = currentIndex + dir;
     if (next < 0 || next >= visibleItems.length) return;
     currentIndex = next;
-    renderLightbox(visibleItems[currentIndex], true);
+    const el = visibleItems[currentIndex];
+    if (el.dataset.id) history.replaceState(null, '', `#p=${el.dataset.id}`);
+    renderLightbox(el, true);
   }
 
   // ── Event listeners ──────────────────────────────────────────────
@@ -213,5 +229,39 @@ function fmtDate(iso?: string) {
       const item = (e.target as Element).closest<HTMLElement>('.pg-item');
       if (item) openLightbox(item);
     });
+
+  // ── Swipe navigation (touch) ─────────────────────────────────────
+  let touchX = 0;
+  let touchY = 0;
+  lightbox.addEventListener('touchstart', e => {
+    touchX = e.touches[0].clientX;
+    touchY = e.touches[0].clientY;
+  }, { passive: true });
+  lightbox.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    const dy = e.changedTouches[0].clientY - touchY;
+    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) {
+      navigate(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
+
+  // ── Blur-up: mark images that were already cached on parse ───────
+  document.querySelectorAll<HTMLImageElement>('.pg-item img').forEach(img => {
+    if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
+  });
+
+  // ── Deep link: #p=<id> opens the lightbox directly ───────────────
+  // Runs on load and on external hash changes. Our own replaceState
+  // calls don't fire hashchange, so this never reacts to itself.
+  function openFromHash() {
+    const match = window.location.hash.match(/^#p=(.+)$/);
+    if (!match) return;
+    const target = document.querySelector<HTMLElement>(
+      `.pg-item[data-id="${CSS.escape(decodeURIComponent(match[1]))}"]`
+    );
+    if (target) openLightbox(target);
+  }
+  window.addEventListener('hashchange', openFromHash);
+  openFromHash();
 
 </script>

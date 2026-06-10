@@ -5,7 +5,9 @@ import { createImageUrlBuilder, type SanityImageSource } from '@sanity/image-url
 export const client = createClient({
   projectId: "o11nd7s5",
   dataset: "production",
-  useCdn: true,
+  // All fetches happen at build time — skip the CDN so rebuilds
+  // always see freshly published content instead of a stale cache.
+  useCdn: false,
   apiVersion: "2024-01-01"
 });
 
