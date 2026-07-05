@@ -5,6 +5,15 @@ export interface MicroPost {
   _id:          string;
   text:         string;
   publishedAt?: string;
+  link?:        string;
+}
+
+export interface LinkPreview {
+  url:          string;
+  domain:       string;
+  title:        string;
+  description?: string;
+  image?:       string;
 }
 
 export interface MonthGroup {
@@ -27,12 +36,82 @@ export const MICRO_QUERY = `
   *[_type == "micro"] | order(publishedAt desc, _createdAt desc) {
     _id,
     text,
-    publishedAt
+    publishedAt,
+    link
   }
 `;
 
 export function fetchMicros(): Promise<MicroPost[]> {
   return client.fetch(MICRO_QUERY);
+}
+
+// ── Link previews ─────────────────────────────────────────────────
+// Fetched at build time by scraping OG/meta tags off the target page.
+// Cached per URL for the lifetime of the build process.
+const linkPreviewCache = new Map<string, Promise<LinkPreview | null>>();
+
+function decodeHtmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .trim();
+}
+
+function matchMeta(html: string, name: string): string | undefined {
+  const attrFirst = new RegExp(
+    `<meta[^>]+(?:property|name)=["']${name}["'][^>]+content=["']([^"']*)["']`, 'i',
+  );
+  const contentFirst = new RegExp(
+    `<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["']${name}["']`, 'i',
+  );
+  return html.match(attrFirst)?.[1] ?? html.match(contentFirst)?.[1];
+}
+
+async function fetchLinkPreviewUncached(url: string): Promise<LinkPreview | null> {
+  const domain = new URL(url).hostname.replace(/^www\./, '');
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; thestream-linkpreview/1.0)' },
+    });
+    clearTimeout(timer);
+
+    if (!res.ok || !(res.headers.get('content-type') ?? '').includes('text/html')) {
+      return { url, domain, title: domain };
+    }
+
+    const html  = await res.text();
+    const title = matchMeta(html, 'og:title') ?? html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1];
+    const desc  = matchMeta(html, 'og:description') ?? matchMeta(html, 'description');
+    let image   = matchMeta(html, 'og:image');
+    if (image && !/^https?:\/\//i.test(image)) image = new URL(image, url).toString();
+
+    return {
+      url,
+      domain,
+      title: title ? decodeHtmlEntities(title) : domain,
+      description: desc ? decodeHtmlEntities(desc) : undefined,
+      image,
+    };
+  } catch {
+    // Network failure, timeout, or blocked bot — degrade to a plain link card.
+    return { url, domain, title: domain };
+  }
+}
+
+/** Scrapes OG/meta tags for a link preview card. Never throws; degrades gracefully. */
+export function fetchLinkPreview(url: string): Promise<LinkPreview | null> {
+  if (!linkPreviewCache.has(url)) {
+    linkPreviewCache.set(url, fetchLinkPreviewUncached(url));
+  }
+  return linkPreviewCache.get(url)!;
 }
 
 // ── Grouping ──────────────────────────────────────────────────────

@@ -5,11 +5,22 @@ import {
   computeStats,
   processBody,
   fmtShortDate,
+  fetchLinkPreview,
+  type LinkPreview,
 } from '../lib/micro';
+import LinkPreviewCard from './LinkPreviewCard.astro';
 
 const posts  = await fetchMicros();
 const groups = groupByMonth(posts);
 const stats  = computeStats(posts);
+
+const previewsById = new Map<string, LinkPreview | null>(
+  await Promise.all(
+    posts
+      .filter(post => post.link)
+      .map(async post => [post._id, await fetchLinkPreview(post.link!)] as const),
+  ),
+);
 ---
 
 <!-- ── Stats bar ──────────────────────────────────────────────── -->
@@ -98,6 +109,9 @@ const stats  = computeStats(posts);
 
             <div class="post-content">
               <div class="post-body" set:html={processBody(post.text ?? '')} />
+              {post.link && (
+                <LinkPreviewCard url={post.link} preview={previewsById.get(post._id) ?? null} />
+              )}
               {tags.length > 0 && (
                 <div class="post-tags">
                   {tags.map(tag => (
@@ -342,6 +356,10 @@ const stats  = computeStats(posts);
     text-decoration-color: var(--c-accent-subtle);
     text-underline-offset: 3px;
     word-break: break-all;
+  }
+
+  .post-content > :global(.link-preview) {
+    margin-top: var(--sp-3);
   }
 
   .post-tags {

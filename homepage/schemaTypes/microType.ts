@@ -23,6 +23,14 @@ export default defineType({
       initialValue: () => new Date().toISOString(),
       validation: Rule => Rule.required(),
     }),
+
+    defineField({
+      name: "link",
+      title: "Link",
+      description: "Optionale URL, die als kleine Vorschau unter dem Text angezeigt wird.",
+      type: "url",
+      validation: Rule => Rule.uri({ scheme: ["http", "https"] }),
+    }),
   ],
 
   preview: {

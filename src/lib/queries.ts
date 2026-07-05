@@ -9,6 +9,7 @@ export const streamQuery = `
 
   // micro
   text,
+  link,
 
   // photo
   caption,
