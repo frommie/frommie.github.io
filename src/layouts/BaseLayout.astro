@@ -63,6 +63,16 @@ const pageTitle = title === 'Home' ? 'frommie.dev' : `${title} — frommie.dev`;
                 }
             })();
         </script>
+
+        <!-- Umami Analytics (self-hosted, cookieless) -->
+        {import.meta.env.PROD && (
+            <script
+                is:inline
+                defer
+                src="https://analytics.frommie.dev/script.js"
+                data-website-id="d3b3e864-48c3-4b76-be3b-31b03af91f6d"
+            ></script>
+        )}
     </head>
     <body>
         <!-- ============================================================
