@@ -4,6 +4,7 @@ export type Micro = {
   _type: "micro";
   text: string;
   publishedAt: string;
+  link?: string;
 };
 
 export type Photo = {
