@@ -26,10 +26,11 @@ export const streamQuery = `
 
       metadata {
         exif,
-        blurhash, 
-        lqip, 
+        blurhash,
+        lqip,
         palette,
-        location
+        location,
+        dimensions { width, height, aspectRatio }
       }
     }
   },

@@ -2,21 +2,34 @@
 // src/components/stream/items/PhotoItem.astro
 import StreamItem from "../StreamItem.astro";
 import {urlFor} from '../../../lib/image'
-import { formatExifSummary } from '../../../lib/photos';
+import { formatExifSummary, effectiveAspectRatio } from '../../../lib/photos';
 
 const { item } = Astro.props;
 const exifSummary = formatExifSummary(item.image?.exif);
 
 const widths = [400, 700, 960, 1400];
-const src = urlFor(item.image).width(960).auto('format').quality(80).url();
+const src = urlFor(item.image).width(960).auto('format').quality(75).url();
 const srcset = widths
-  .map(w => `${urlFor(item.image).width(w).auto('format').quality(80).url()} ${w}w`)
+  .map(w => `${urlFor(item.image).width(w).auto('format').quality(75).url()} ${w}w`)
   .join(', ');
-const sizes = '(max-width: 640px) 100vw, min(900px, calc(100vw - 3rem))';
+/* Die Stream-Spalte ist maximal 672px breit (--content-width minus Padding) */
+const sizes = '(max-width: 640px) calc(100vw - 48px), 640px';
+const ratio = effectiveAspectRatio(item);
+const width = 960;
+const height = Math.round(width / ratio);
 ---
 <StreamItem type="photo" date={item.publishedAt}>
   <figure>
-    <img src={src} srcset={srcset} sizes={sizes} alt={item.caption ?? ''} />
+    <img
+      src={src}
+      srcset={srcset}
+      sizes={sizes}
+      width={width}
+      height={height}
+      alt={item.caption ?? ''}
+      loading="lazy"
+      decoding="async"
+    />
     {item.caption && <figcaption>{item.caption}</figcaption>}
     {exifSummary && <div class="photo-exif">{exifSummary}</div>}
   </figure>

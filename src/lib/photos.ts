@@ -70,13 +70,13 @@ export function lightboxImageUrl(photo: SanityPhoto): string {
 /* Width-only URLs — the photo keeps its true (editor-cropped) aspect ratio,
    the justified grid adapts to the photo instead of cropping it. */
 export function photoImageUrl(photo: SanityPhoto, width = 700): string {
-  return urlFor(photo.image).width(width).fit('max').auto('format').quality(80).url();
+  return urlFor(photo.image).width(width).fit('max').auto('format').quality(75).url();
 }
 
 export function photoSrcSet(photo: SanityPhoto): string {
   const widths = [320, 480, 700, 960];
   return widths
-    .map(w => `${urlFor(photo.image).width(w).fit('max').auto('format').quality(80).url()} ${w}w`)
+    .map(w => `${urlFor(photo.image).width(w).fit('max').auto('format').quality(75).url()} ${w}w`)
     .join(', ');
 }
 

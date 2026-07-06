@@ -5,6 +5,8 @@ import "@fontsource/lora/400.css";
 import "@fontsource/lora/600.css";
 import "@fontsource/lora/400-italic.css";
 import "@fontsource-variable/jetbrains-mono";
+import soraWoff2 from "@fontsource-variable/sora/files/sora-latin-wght-normal.woff2?url";
+import loraWoff2 from "@fontsource/lora/files/lora-latin-400-normal.woff2?url";
 
 interface Props {
   title: string;
@@ -33,6 +35,9 @@ const pageTitle = title === 'Home' ? 'frommie.dev' : `${title} — frommie.dev`;
         <meta name="generator" content={Astro.generator} />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="preload" as="font" type="font/woff2" crossorigin href={soraWoff2} />
+        <link rel="preload" as="font" type="font/woff2" crossorigin href={loraWoff2} />
+        <link rel="preconnect" href="https://cdn.sanity.io" />
         <title>{pageTitle}</title>
         <link rel="canonical" href={canonicalUrl} />
         <meta name="description" content={description} />
@@ -120,8 +125,10 @@ const pageTitle = title === 'Home' ? 'frommie.dev' : `${title} — frommie.dev`;
         </div>
         </nav>
 
-        <slot />
-        
+        <main>
+            <slot />
+        </main>
+
         <!-- Footer -->
         <footer class="footer">
             <div class="footer-inner">
