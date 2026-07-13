@@ -2,13 +2,13 @@
 // src/components/stream/items/MicroItem.astro
 import StreamItem from "../StreamItem.astro";
 import LinkPreviewCard from "../../LinkPreviewCard.astro";
-import { fetchLinkPreview } from "../../../lib/micro";
+import { fetchLinkPreview, microUrl } from "../../../lib/micro";
 
 const { item } = Astro.props;
 const preview = item.link ? await fetchLinkPreview(item.link) : null;
 ---
 
-<StreamItem type="micro" date={item.publishedAt}>
+<StreamItem type="micro" date={item.publishedAt} href={item.publishedAt ? microUrl(item) : undefined}>
   <p class="stream-body">{item.text}</p>
   {item.link && <LinkPreviewCard url={item.link} preview={preview} />}
 </StreamItem>

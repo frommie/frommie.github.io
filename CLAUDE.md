@@ -22,9 +22,9 @@ This is a personal site ("thestream") built with **Astro 6 + Sanity CMS** (proje
 ### Content model
 
 Three Sanity document types drive the entire site:
-- **`article`** — long-form posts with `body` (Portable Text), `slug`, `tags`, `readingTime`, `featured` flag
-- **`micro`** — short-form text posts with `text`, `publishedAt`, `tags`
-- **`photo`** — images with `image` (including `crop`/`hotspot`/`exif`), `caption`, `date`, `roll`, `meta`
+- **`article`** — long-form posts with `content` (Portable Text: blocks, image and code blocks), `slug`, `tags`, `excerpt`, `publishedAt`; `readingTime` is computed in GROQ (`queries.ts`), not stored
+- **`micro`** — short-form text posts with `text`, `publishedAt`, optional `link` (rendered as link preview); permalink pages at `/micros/[slug]` with the slug derived from `publishedAt` (`microSlug()` in `src/lib/micro.ts`), no slug field in Sanity
+- **`photo`** — images with `image` (including `crop`/`hotspot`/`exif`), `caption`, `camera`, `location`, `publishedAt`
 
 The homepage renders a **chronological mixed feed** of all three types via `Stream.astro`.
 
@@ -62,4 +62,4 @@ Fonts loaded from Google Fonts: **Sora** (sans), **Lora** (serif), **JetBrains M
 
 ### Sanity Studio
 
-The `homepage/` directory is a standalone Sanity Studio v3 project. Schemas live in code under `homepage/schemaTypes/` (`article`, `micro`, `photo`, `siteSettings`, `now`) and are registered in `schemaTypes/index.ts`. Schema changes require redeploying the Studio (`cd homepage && npm run deploy`) or running it locally.
+The `homepage/` directory is a standalone Sanity Studio project (v5). Schemas live in code under `homepage/schemaTypes/` (`article`, `micro`, `photo`, `siteSettings`, `now`) and are registered in `schemaTypes/index.ts`. Article body blocks use `@sanity/code-input` for code blocks; custom Portable Text renderers for the frontend live in `src/components/portabletext/`. Schema changes require redeploying the Studio (`cd homepage && npm run deploy`) or running it locally.

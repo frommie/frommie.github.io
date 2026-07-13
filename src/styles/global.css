@@ -657,6 +657,9 @@ img {
   font-family: var(--font-mono);
 }
 
+.stream-date-link { text-decoration: none; }
+.stream-date-link:hover .stream-date { color: var(--c-accent); }
+
 .stream-dot {
   width: 3px;
   height: 3px;

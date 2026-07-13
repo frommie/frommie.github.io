@@ -593,6 +593,22 @@ h3 in body: --font-sans, --text-lg, weight 600, letter-spacing -0.015em, margin-
 paragraphs: margin-bottom 1.6em
 ```
 
+### Micro Permalink Page
+
+Every micro post has a permalink page at `/micros/<slug>/`; the slug is derived
+from `publishedAt` (UTC), e.g. `2026-07-13-0930` — there is no slug field in Sanity.
+Feed and stream link to it via the post date (hover: `--c-accent`).
+
+```
+max-width: var(--article-width)   /* 680px, same column as articles */
+padding: var(--sp-16) var(--sp-6) var(--sp-24)
+
+meta row: "Micro" type label + dot + full date/time — --font-mono, --text-xs, --c-text-tertiary
+body: --font-sans, --text-md, --leading-relaxed   /* sans, not serif: micros are not articles */
+link preview card below body, margin-top --sp-5
+back link "← Micros" above, like the article page's back link
+```
+
 ### Hero Section
 
 Two-column grid: `grid-template-columns: 1fr auto`, `gap: var(--sp-12)`.

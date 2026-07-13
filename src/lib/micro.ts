@@ -196,6 +196,22 @@ export function processBody(raw: string): string {
     .join('');
 }
 
+// ── Permalinks ────────────────────────────────────────────────────
+/**
+ * Derives a stable, human-readable slug from `publishedAt` (UTC),
+ * e.g. "2026-07-13T09:30:00Z" → "2026-07-13-0930".
+ * Micros have no slug field in Sanity; two posts within the same
+ * minute would collide — getStaticPaths guards against that.
+ */
+export function microSlug(post: MicroPost): string {
+  if (!post.publishedAt) return '';
+  return post.publishedAt.slice(0, 16).replace('T', '-').replace(':', '');
+}
+
+export function microUrl(post: MicroPost): string {
+  return `/micros/${microSlug(post)}/`;
+}
+
 // ── Date helpers ──────────────────────────────────────────────────
 export function fmtShortDate(iso?: string): string {
   if (!iso) return '—';
