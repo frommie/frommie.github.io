@@ -1,6 +1,7 @@
 ---
 // src/components/stream/StreamItem.astro
-const { type, date } = Astro.props;
+// `href` (optional) macht das Datum zum Permalink des Beitrags.
+const { type, date, href } = Astro.props;
 
 const TYPE_LABEL: Record<string, string> = {
   article: 'Artikel',
@@ -20,7 +21,13 @@ function fmtDate(iso?: string): string {
   <div class="stream-meta">
     <span class="stream-type">{TYPE_LABEL[type] ?? type}</span>
     <span class="stream-dot"></span>
-    <time class="stream-date" datetime={date}>{fmtDate(date)}</time>
+    {href ? (
+      <a class="stream-date-link" href={href} title="Permalink zu diesem Beitrag">
+        <time class="stream-date" datetime={date}>{fmtDate(date)}</time>
+      </a>
+    ) : (
+      <time class="stream-date" datetime={date}>{fmtDate(date)}</time>
+    )}
   </div>
 
   <slot />

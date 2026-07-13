@@ -6,6 +6,7 @@ import {
   processBody,
   fmtShortDate,
   fetchLinkPreview,
+  microUrl,
   type LinkPreview,
 } from '../lib/micro';
 import LinkPreviewCard from './LinkPreviewCard.astro';
@@ -103,9 +104,13 @@ const previewsById = new Map<string, LinkPreview | null>(
             data-year={String(year)}
             data-tags={tags.join(',')}
           >
-            <time class="post-date" datetime={post.publishedAt ?? ''}>
-              {fmtShortDate(post.publishedAt)}
-            </time>
+            {post.publishedAt ? (
+              <a class="post-date" href={microUrl(post)} title="Permalink zu diesem Beitrag">
+                <time datetime={post.publishedAt}>{fmtShortDate(post.publishedAt)}</time>
+              </a>
+            ) : (
+              <time class="post-date">{fmtShortDate(post.publishedAt)}</time>
+            )}
 
             <div class="post-content">
               <div class="post-body" set:html={processBody(post.text ?? '')} />
@@ -339,6 +344,11 @@ const previewsById = new Map<string, LinkPreview | null>(
     padding-top: 3px;
     line-height: 1.5;
   }
+  a.post-date {
+    text-decoration: none;
+    transition: color var(--t-fast);
+  }
+  a.post-date:hover { color: var(--c-accent); }
 
   .post-content { min-width: 0; }
 
