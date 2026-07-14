@@ -1,0 +1,39 @@
+---
+/**
+ * Rendert einen Code-Block (@sanity/code-input) aus dem Article-Body.
+ * Basis-Styling für pre/code kommt aus articles/[slug].astro.
+ */
+const { node } = Astro.props;
+---
+
+<figure class="pt-code">
+  {node.filename && <figcaption class="pt-code-filename">{node.filename}</figcaption>}
+  <pre data-language={node.language}><code>{node.code}</code></pre>
+</figure>
+
+<style>
+  .pt-code {
+    margin: 0 0 1.6em;
+  }
+
+  .pt-code pre {
+    margin-bottom: 0;
+  }
+
+  .pt-code-filename {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--c-text-tertiary);
+    letter-spacing: 0.03em;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-bottom: none;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: var(--sp-2) var(--sp-5);
+  }
+
+  .pt-code-filename + pre {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+</style>

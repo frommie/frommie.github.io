@@ -1,0 +1,67 @@
+---
+/**
+ * Rendert einen Bild-Block aus dem Article-Body (Portable Text).
+ * Erwartet das in queries.ts expandierte asset (metadata.dimensions, lqip).
+ */
+import { urlFor } from "../../lib/sanity";
+
+const { node } = Astro.props;
+
+const dims = node.asset?.metadata?.dimensions;
+// Artikel-Spalte ist 680px breit (--article-width) → 2x für Retina.
+const maxWidth = 1360;
+const width = Math.min(dims?.width ?? maxWidth, maxWidth);
+const height = dims?.aspectRatio ? Math.round(width / dims.aspectRatio) : undefined;
+
+const src = node.asset
+  ? urlFor(node).width(width).fit("max").auto("format").url()
+  : null;
+
+const srcsetWidths = [680, 1020, 1360].filter(w => w <= (dims?.width ?? maxWidth));
+const srcset = srcsetWidths.length
+  ? srcsetWidths
+      .map(w => `${urlFor(node).width(w).fit("max").auto("format").url()} ${w}w`)
+      .join(", ")
+  : undefined;
+---
+
+{src && (
+  <figure class="pt-figure">
+    <img
+      src={src}
+      srcset={srcset}
+      sizes="(max-width: 728px) 100vw, 680px"
+      alt={node.alt ?? ""}
+      width={width}
+      height={height}
+      loading="lazy"
+      decoding="async"
+      style={node.asset?.metadata?.lqip
+        ? `background: url(${node.asset.metadata.lqip}) center / cover no-repeat;`
+        : undefined}
+    />
+    {node.caption && <figcaption>{node.caption}</figcaption>}
+  </figure>
+)}
+
+<style>
+  .pt-figure {
+    margin: 2em 0;
+  }
+
+  .pt-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+  }
+
+  .pt-figure figcaption {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--c-text-tertiary);
+    letter-spacing: 0.03em;
+    margin-top: var(--sp-3);
+    text-align: center;
+  }
+</style>

@@ -1,6 +1,7 @@
 // schemas/micro.ts
 
 import { defineType, defineField } from "sanity";
+import { formatPreviewDate } from "./lib/formatDate";
 
 export default defineType({
   name: "micro",
@@ -41,7 +42,7 @@ export default defineType({
     prepare({ title, subtitle }) {
       return {
         title: title?.slice(0, 50),
-        subtitle: subtitle,
+        subtitle: formatPreviewDate(subtitle),
       };
     },
   },

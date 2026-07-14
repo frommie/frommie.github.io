@@ -1,7 +1,16 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { PortableText } from "astro-portabletext";
+import PTImage from "../../components/portabletext/PTImage.astro";
+import PTCode from "../../components/portabletext/PTCode.astro";
 import { getArticle, getAllSlugs } from "../../lib/api";
+
+const ptComponents = {
+  type: {
+    image: PTImage,
+    code: PTCode,
+  },
+};
 
 export async function getStaticPaths() {
   const slugs = await getAllSlugs();
@@ -58,7 +67,7 @@ function fmtDate(iso?: string) {
 
     {article.content && (
       <div class="article-body">
-        <PortableText value={article.content} />
+        <PortableText value={article.content} components={ptComponents} />
       </div>
     )}
 
