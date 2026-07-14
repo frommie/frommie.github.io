@@ -1,5 +1,6 @@
 import { defineType, defineField } from "sanity";
 import { ExifImageInput } from "../components/ExifImageInput";
+import { formatPreviewDate } from "./lib/formatDate";
 
 export default defineType({
   name: "photo",
@@ -48,5 +49,12 @@ export default defineType({
   ],
   preview: {
     select: { media: "image", title: "caption", subtitle: "publishedAt" },
+    prepare({ media, title, subtitle }) {
+      return {
+        media,
+        title: title || "Ohne Caption",
+        subtitle: formatPreviewDate(subtitle),
+      };
+    },
   },
 });

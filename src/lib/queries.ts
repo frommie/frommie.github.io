@@ -47,7 +47,19 @@ export const articleQuery = `
 *[_type == "article" && slug.current == $slug][0] {
   title,
   excerpt,
-  content,
+  content[] {
+    ...,
+    _type == "image" => {
+      asset->{
+        _id,
+        url,
+        metadata {
+          lqip,
+          dimensions { width, height, aspectRatio }
+        }
+      }
+    }
+  },
   publishedAt,
   tags,
   "readingTime": coalesce(round(length(pt::text(content)) / 5 / 200), 1)
